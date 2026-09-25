@@ -281,7 +281,7 @@ commented at the site of the change.
 
 | Spec | Shipped | Why |
 |---|---|---|
-| §6 Button: primary is "accent fill, **white text**, glow" | Accent fill, **dark ink** (`--color-bg`, `#070D13`) | White on `#1EA6C6` measures **2.86:1** — below the 4.5:1 WCAG AA minimum required by §2.5, and Lighthouse flags it. Dark ink on the same fill measures **6.8:1**. The same change applies to the accent chat bubble in the consultants panel. **Open for review — decide from the screenshots.** |
+| §6 Button: primary is "accent fill, **white text**, glow" | Accent fill, **dark ink** (`--color-bg`, `#070D13`) | White on `#1EA6C6` measures **2.86:1** — below the 4.5:1 WCAG AA minimum required by §2.5, and Lighthouse flags it. Dark ink on the same fill measures **6.8:1**. The same change applies to the accent chat bubble in the consultants panel. **Accepted.** |
 | §6 ActionCard: "Approved cards at **60% opacity**" | No opacity; decided cards recede via a softer border and `inkSoft` title | Dimming the whole card drops its label text to ~2.7:1 and its status pills to ~3.1:1. The de-emphasis reads the same at full contrast. |
 | §5 folder list includes `tailwind.config.ts` | No config file; tokens live in `@theme` in `globals.css` | Tailwind 4 is CSS-first and treats the config file as legacy. Keeping one would split the token definitions in two, against §2.7. |
 | §3 "Foreground 3D driven by Framer Motion" | Framer Motion drives the three scroll scenes; the hero and the cheap effects are CSS | Framer Motion's runtime is 35 KB gzip. Keeping it out of the hero and off the critical path is what brings initial JS to 153 KB against §2.4's 180 KB budget. It is still the animation library for every scroll-linked scene. |

@@ -1,0 +1,32 @@
+# Cloudflare Pages headers.
+# Docs: https://developers.cloudflare.com/pages/configuration/headers/
+
+/*
+  # Never let a browser second-guess a declared content type.
+  X-Content-Type-Options: nosniff
+  # Send the origin cross-site, the full path same-origin.
+  Referrer-Policy: strict-origin-when-cross-origin
+  # The site is never meant to be framed.
+  X-Frame-Options: DENY
+  # Opt out of the powerful features the page does not use.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+  # Content Security Policy.
+  #   'unsafe-inline' on style-src is required: Next inlines the stylesheet
+  #   (experimental.inlineCss) and React writes inline style attributes.
+  #   'wasm-unsafe-eval' on script-src covers three.js' optional wasm paths.
+  #   frame-ancestors repeats X-Frame-Options for browsers that honour CSP only.
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self' blob:; upgrade-insecure-requests
+
+# Build output is content-hashed, so it can be cached forever.
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/posters/*
+  Cache-Control: public, max-age=604800
+
+# HTML must revalidate so a redeploy is picked up immediately.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
