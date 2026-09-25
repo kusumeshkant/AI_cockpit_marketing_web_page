@@ -22,6 +22,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    # Job-wide: the build bakes these in, and the header tests assert against
+    # the same values. Setting them per-step let the two disagree.
+    env:
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_NOINDEX: ${{ vars.NEXT_PUBLIC_NOINDEX }}
+
     steps:
       - uses: actions/checkout@v5
 
@@ -41,9 +47,6 @@ jobs:
       # tested below is byte-for-byte what ships.
       - name: Build (static export)
         run: npm run build
-        env:
-          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
-          NEXT_PUBLIC_NOINDEX: ${{ vars.NEXT_PUBLIC_NOINDEX }}
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
