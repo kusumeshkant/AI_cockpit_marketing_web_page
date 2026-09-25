@@ -1,28 +1,39 @@
 import type { Metadata, Viewport } from 'next';
-import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
+import localFont from 'next/font/local';
 import { brand, faq, meta, NOINDEX, SITE_URL } from '@/content/site';
 import { colors } from '@/styles/tokens';
 import './globals.css';
 
-const archivo = Archivo({
-  subsets: ['latin'],
-  weight: ['700', '800'],
+/*
+ * Fonts are self-hosted from `src/app/fonts` rather than fetched by
+ * `next/font/google`. The Google loader downloads at build time, which fails
+ * inside Turbopack's font pipeline on Linux CI and would put the same
+ * dependency on the Cloudflare Pages build container. Run `npm run fonts` to
+ * refresh the files; all three are variable, so one file covers each range.
+ */
+
+const archivo = localFont({
+  src: './fonts/archivo.woff2',
+  weight: '700 800',
+  style: 'normal',
   display: 'swap',
   variable: '--font-archivo',
 });
 
-const plexSans = IBM_Plex_Sans({
-  subsets: ['latin'],
-  weight: ['400', '600'],
+const plexSans = localFont({
+  src: './fonts/ibm-plex-sans.woff2',
+  weight: '400 600',
+  style: 'normal',
   display: 'swap',
   variable: '--font-plex-sans',
 });
 
 // Mono is only used for small labels, never for the LCP element, so it is
 // fetched without competing for bandwidth with the headline font.
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['600'],
+const plexMono = localFont({
+  src: './fonts/ibm-plex-mono.woff2',
+  weight: '600',
+  style: 'normal',
   display: 'swap',
   preload: false,
   variable: '--font-plex-mono',
