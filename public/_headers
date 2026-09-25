@@ -1,10 +1,14 @@
 # Cloudflare Pages headers.
 # Docs: https://developers.cloudflare.com/pages/configuration/headers/
 #
-# `__INLINE_SCRIPT_HASHES__` below is replaced at build time by
-# scripts/csp-headers.mjs, which hashes every inline <script> Next emits into
-# out/. A static export has no request-time nonce, so hashes are the only way to
-# keep script-src strict while letting the RSC payload run.
+# Two placeholders below are substituted at build time by
+# scripts/csp-headers.mjs:
+#   __INLINE_SCRIPT_HASHES__  a sha256 per inline <script> Next emits into out/.
+#                             A static export has no request-time nonce, so
+#                             hashes are the only way to keep script-src strict
+#                             while letting the RSC payload run.
+#   __NOINDEX_HEADER__        an X-Robots-Tag line when NEXT_PUBLIC_NOINDEX is
+#                             "true", otherwise removed entirely.
 
 /*
   # Never let a browser second-guess a declared content type.
@@ -13,6 +17,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   # The site is never meant to be framed.
   X-Frame-Options: DENY
+__NOINDEX_HEADER__
   # HTTPS only, once the domain is stable.
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   # Opt out of the powerful features the page does not use.

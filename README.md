@@ -198,9 +198,11 @@ How that is achieved:
 ### Content Security Policy
 
 Next's static export ships the RSC payload as inline `<script>` blocks, and a static site has no
-request-time nonce. `npm run build` therefore runs `scripts/csp-headers.mjs` as a `postbuild`
+request-time nonce. `npm run build` therefore runs `scripts/headers.mjs` as a `postbuild`
 step: it hashes every inline script in `out/` and substitutes them into the `script-src` of
-`out/_headers`, so the policy needs no `'unsafe-inline'`.
+`out/_headers`, so the policy needs no `'unsafe-inline'`. The same step adds
+`X-Robots-Tag: noindex, nofollow` while `NEXT_PUBLIC_NOINDEX` is `true`, and omits it
+otherwise.
 
 `tests/headers.spec.ts` fails the suite if any inline script is left unhashed. Without it the
 site hydrates fine locally — `serve` ignores `_headers` — and silently fails to hydrate on
@@ -237,42 +239,64 @@ not rewrite extensionless URLs.
 
 ### Deploy (Cloudflare Pages)
 
-This is the current target. The staging host is **`aicockpit.dqstore.in`**, a temporary
-subdomain used until the real domain is chosen.
+The site is live on Cloudflare Pages, project **`ai-cockpit`**:
 
-1. **Connect the repo** — Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to
-   Git, and pick `AI_cockpit_marketing_web_page`.
-2. **Build settings** — framework preset **Next.js (Static HTML Export)**:
-   - Build command: `npm run build`
-   - Build output directory: `out`
-   - Root directory: repository root (this project is the whole repo)
-3. **Environment variables** (Settings → Environment variables, Production _and_ Preview):
+|                   |                                  |
+| ----------------- | -------------------------------- |
+| Production        | https://ai-cockpit-12h.pages.dev |
+| Custom domain     | https://aicockpit.dqstore.in     |
+| Production branch | `main`                           |
 
-   | Variable               | Staging value                  |
-   | ---------------------- | ------------------------------ |
-   | `NEXT_PUBLIC_DEMO_URL` | the Cal.com / Calendly link    |
-   | `NEXT_PUBLIC_SITE_URL` | `https://aicockpit.dqstore.in` |
-   | `NEXT_PUBLIC_NOINDEX`  | `true`                         |
+`aicockpit.dqstore.in` is a temporary subdomain used until the real domain is chosen, which is
+why every build sets `NEXT_PUBLIC_NOINDEX=true`.
 
-4. **Custom domain** — Pages project → Custom domains → add `aicockpit.dqstore.in`, then at the
-   DNS provider for `dqstore.in` add a **CNAME** record:
+#### Automatic deploys
 
-   ```
-   aicockpit   CNAME   <project>.pages.dev
-   ```
+`.github/workflows/ci.yml` deploys on every run, after the `lint · types · build · tests` job
+passes — the deploy job `needs:` it and reuses the exact artifact that was tested, so what ships
+is byte-for-byte what CI verified.
 
-   Cloudflare issues the certificate once the record resolves.
+| Trigger        | Deploy                                                 |
+| -------------- | ------------------------------------------------------ |
+| push to `main` | production, `--branch main`                            |
+| pull request   | preview, `--branch <head>`, URL posted as a PR comment |
 
-5. **When the real domain goes live** — point it at the same project, set
-   `NEXT_PUBLIC_SITE_URL` to the new origin, **remove `NEXT_PUBLIC_NOINDEX`** (or set it to
-   `false`) and redeploy. Leaving it on would keep the production site out of search results.
+Pull requests from forks are skipped: they receive no repository secrets and must never be able
+to deploy. A per-target concurrency group prevents two deploys overlapping, and it never
+cancels one in flight.
 
-`public/_headers` ships with the build and Cloudflare Pages applies it automatically:
-immutable one-year caching for `/_next/static/*` (the filenames are content-hashed), a
-revalidate-always policy for HTML, and the security headers — `X-Content-Type-Options`,
-`Referrer-Policy`, `X-Frame-Options: DENY`, `Permissions-Policy` and a CSP scoped to what the
-site actually loads (everything is same-origin; `style-src` allows `'unsafe-inline'` because
-Next inlines the stylesheet and React writes inline style attributes).
+#### Repository configuration
+
+Variables (not secret — they are baked into the public bundle):
+
+```bash
+gh variable set NEXT_PUBLIC_SITE_URL --body https://aicockpit.dqstore.in
+gh variable set NEXT_PUBLIC_NOINDEX  --body true
+```
+
+Secrets:
+
+```bash
+gh secret set CLOUDFLARE_API_TOKEN    # prompts, so the value never reaches a shell history
+gh secret set CLOUDFLARE_ACCOUNT_ID
+```
+
+The API token is a **custom token** from Cloudflare → My Profile → API Tokens, scoped to the
+minimum: **Account → Cloudflare Pages → Edit**, limited to this account. Adding the custom
+domain also needs **Zone → DNS → Edit** scoped to `dqstore.in` alone.
+
+#### Manual deploy
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://aicockpit.dqstore.in NEXT_PUBLIC_NOINDEX=true npm run build
+npx wrangler pages deploy out --project-name ai-cockpit --branch main
+```
+
+#### When the real domain goes live
+
+Point it at the same project, set `NEXT_PUBLIC_SITE_URL` to the new origin, **remove
+`NEXT_PUBLIC_NOINDEX`** (or set it to `false`) and redeploy. Leaving it on would keep the
+production site out of search results.
 
 ### Other hosts
 

@@ -13,7 +13,7 @@
     "test": "playwright test",
     "test:install": "playwright install --with-deps chromium",
     "lighthouse": "node scripts/lighthouse.mjs",
-    "postbuild": "node scripts/csp-headers.mjs",
+    "postbuild": "node scripts/headers.mjs",
     "fonts": "node scripts/fetch-fonts.mjs"
   },
   "dependencies": {
