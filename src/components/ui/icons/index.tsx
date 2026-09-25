@@ -123,14 +123,6 @@ export function BellIcon(props: IconProps) {
   );
 }
 
-export function ShieldIcon(props: IconProps) {
-  return (
-    <Svg {...props}>
-      <path d="M12 3 5 5.8v5.4c0 4.3 2.9 8.1 7 9.3 4.1-1.2 7-5 7-9.3V5.8L12 3Z" />
-    </Svg>
-  );
-}
-
 /** The AI Cockpit HUD mark: two concentric rings plus a centre dot. */
 export function HudMark({ title, ...props }: IconProps) {
   return (

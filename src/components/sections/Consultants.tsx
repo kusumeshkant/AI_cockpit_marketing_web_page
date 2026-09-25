@@ -9,8 +9,8 @@ import { Section } from '../ui/Section';
 
 /**
  * The reseller pitch, wrapped in a glowing accent panel. Fully static: the
- * breathing glow and the staggered chat bubbles are CSS keyframes, so nothing
- * here hydrates.
+ * breathing glow is a CSS keyframe and the chat bubbles reveal on a CSS view
+ * timeline as the panel scrolls in, so nothing here hydrates.
  */
 export function Consultants() {
   return (
@@ -53,9 +53,14 @@ export function Consultants() {
                 {consultants.chat.map((bubble, i) => (
                   <div
                     key={bubble.id}
-                    style={{ animationDelay: `${i * 0.35}s` } as CSSProperties}
+                    style={
+                      {
+                        '--reveal-delay': `${i * 0.35}s`,
+                        '--reveal-offset': `${i * 10}%`,
+                      } as CSSProperties
+                    }
                     className={cn(
-                      'max-w-[85%] motion-safe:animate-[fade-up_0.5s_ease-out_both]',
+                      'reveal max-w-[85%]',
                       bubble.side === 'right' ? 'self-end text-right' : 'self-start',
                     )}
                   >

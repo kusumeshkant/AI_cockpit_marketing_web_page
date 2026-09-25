@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cta, DEMO_URL, nav } from '@/content/site';
 import { Button } from '../ui/Button';
 import { cn } from '../ui/cn';
@@ -12,6 +12,7 @@ import { Logo } from '../ui/Logo';
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -28,10 +29,13 @@ export function Nav() {
     };
     document.addEventListener('keydown', onKey);
     const previous = document.body.style.overflow;
+    const trigger = menuButtonRef.current;
     document.body.style.overflow = 'hidden';
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previous;
+      // Send focus back to the trigger rather than to <body> (WCAG 2.4.3).
+      trigger?.focus();
     };
   }, [menuOpen]);
 
@@ -66,11 +70,14 @@ export function Nav() {
         </div>
 
         <button
+          ref={menuButtonRef}
           type="button"
           onClick={() => setMenuOpen(true)}
           aria-label={nav.openMenu}
           aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
+          // #mobile-menu only exists while the sheet is open; referencing a
+          // missing id is an invalid aria-controls value.
+          aria-controls={menuOpen ? 'mobile-menu' : undefined}
           className="border-line-strong text-ink inline-flex size-11 items-center justify-center rounded-(--radius-btn) border lg:hidden"
         >
           <MenuIcon className="size-5" />

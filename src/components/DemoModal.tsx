@@ -17,6 +17,8 @@ interface DemoModalProps {
 export function DemoModal({ open, onClose }: DemoModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  /** The element that had focus before the dialog opened. */
+  const openerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -49,11 +51,15 @@ export function DemoModal({ open, onClose }: DemoModalProps) {
     document.addEventListener('keydown', onKey);
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+
+    openerRef.current = document.activeElement as HTMLElement | null;
     closeRef.current?.focus();
 
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = previous;
+      // Without this the user is dropped at the top of the document (WCAG 2.4.3).
+      openerRef.current?.focus?.();
     };
   }, [open, onClose]);
 

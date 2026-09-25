@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { cn } from './cn';
-import { Container } from './Container';
 import { Eyebrow, type EyebrowTone } from './Eyebrow';
 
 interface SectionProps {
@@ -64,9 +63,4 @@ export function SectionHeader({
       {sub ? <p className="text-body-l text-ink-soft max-w-2xl">{sub}</p> : null}
     </div>
   );
-}
-
-/** Full-width section wrapper that also applies the content container. */
-export function SectionInner({ children, className }: { children: ReactNode; className?: string }) {
-  return <Container className={className}>{children}</Container>;
 }

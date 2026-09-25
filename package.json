@@ -12,7 +12,8 @@
     "assets": "node scripts/generate-assets.mjs",
     "test": "playwright test",
     "test:install": "playwright install --with-deps chromium",
-    "lighthouse": "node scripts/lighthouse.mjs"
+    "lighthouse": "node scripts/lighthouse.mjs",
+    "postbuild": "node scripts/csp-headers.mjs"
   },
   "dependencies": {
     "@react-three/drei": "10.7.8",

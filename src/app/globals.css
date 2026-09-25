@@ -330,3 +330,44 @@
     transform: translateY(0);
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Below-the-fold reveals.
+ *
+ * Where CSS view timelines are supported the animation is driven by the
+ * element entering the viewport, which is what spec §8 asks for. Everywhere
+ * else it falls back to playing on load. No JavaScript in either case, so the
+ * sections that use it stay server components.
+ *
+ *   --reveal-delay   stagger for the time-based fallback
+ *   --reveal-offset  stagger for the scroll-driven range
+ * ------------------------------------------------------------------ */
+@layer utilities {
+  .reveal {
+    animation: fade-up 0.5s ease-out both;
+    animation-delay: var(--reveal-delay, 0s);
+  }
+
+  .reveal-draw {
+    animation: draw-check 0.7s ease-out both;
+    animation-delay: var(--reveal-delay, 0s);
+  }
+
+  @supports (animation-timeline: view()) {
+    .reveal,
+    .reveal-draw {
+      animation-delay: 0s;
+      animation-timeline: view();
+      animation-range: entry calc(15% + var(--reveal-offset, 0%)) entry
+        calc(65% + var(--reveal-offset, 0%));
+    }
+  }
+
+  /* Reduced motion keeps the resting state, which is already the final one. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal-draw {
+      animation: none;
+    }
+  }
+}

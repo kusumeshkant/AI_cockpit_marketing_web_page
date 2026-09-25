@@ -21,7 +21,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npx --yes serve out -l ${PORT} -s`,
+    // The local binary, not `npx --yes`: no network path, and no chance of a
+    // different version being fetched in CI.
+    command: `node node_modules/serve/build/main.js out -l ${PORT} -s`,
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

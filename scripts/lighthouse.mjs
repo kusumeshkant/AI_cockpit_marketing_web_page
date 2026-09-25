@@ -197,9 +197,7 @@ try {
   }
 
   console.log(`${target}`);
-  console.log(
-    `${strict ? 'strict' : 'local'} mode · median of ${RUNS} runs per form factor\n`,
-  );
+  console.log(`${strict ? 'strict' : 'local'} mode · median of ${RUNS} runs per form factor\n`);
 
   const rows = [
     ['form factor', 'perf', 'a11y', 'best-pr', 'seo', 'LCP', 'CLS', 'TBT'],

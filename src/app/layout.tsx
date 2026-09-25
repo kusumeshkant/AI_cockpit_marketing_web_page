@@ -39,9 +39,7 @@ const ogImages = SITE_URL
   : undefined;
 
 export const metadata: Metadata = {
-  ...(SITE_URL
-    ? { metadataBase: new URL(SITE_URL), alternates: { canonical: '/' } }
-    : {}),
+  ...(SITE_URL ? { metadataBase: new URL(SITE_URL), alternates: { canonical: '/' } } : {}),
   title: meta.title,
   description: meta.description,
   applicationName: brand.name,

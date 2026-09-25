@@ -4,9 +4,9 @@ import { Container } from '../ui/Container';
 import { Section, SectionHeader } from '../ui/Section';
 
 /**
- * A check mark that draws its own stroke. The animation is a CSS keyframe with
- * a per-card delay rather than an observer, so this section never hydrates;
- * under reduced motion the stroke is simply already drawn.
+ * A check mark that draws its own stroke as the card scrolls into view. Driven
+ * by a CSS view timeline rather than an observer, so this section never
+ * hydrates; under reduced motion the stroke is simply already drawn.
  */
 function DrawnCheck({ index }: { index: number }) {
   return (
@@ -25,8 +25,13 @@ function DrawnCheck({ index }: { index: number }) {
         d="m4.5 12.5 5 5 10-11"
         pathLength={1}
         strokeDasharray={1}
-        style={{ animationDelay: `${index * 0.08}s` } as CSSProperties}
-        className="[stroke-dashoffset:0] motion-safe:animate-[draw-check_0.7s_ease-out_both]"
+        style={
+          {
+            '--reveal-delay': `${index * 0.08}s`,
+            '--reveal-offset': `${index * 4}%`,
+          } as CSSProperties
+        }
+        className="reveal-draw [stroke-dashoffset:0]"
       />
     </svg>
   );
