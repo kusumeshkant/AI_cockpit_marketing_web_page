@@ -128,7 +128,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           URL: ${{ steps.deploy.outputs.deployment-url }}
           PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        # --repo is required: this job never checks the source out, so gh has no
+        # git remote to infer the repository from.
         run: |
           body="Cloudflare Pages preview for \`${{ steps.target.outputs.branch }}\`: $URL"
-          gh pr comment "$PR" --body "$body" --edit-last \
-            || gh pr comment "$PR" --body "$body"
+          gh pr comment "$PR" --repo "$REPO" --body "$body" --edit-last \
+            || gh pr comment "$PR" --repo "$REPO" --body "$body"
