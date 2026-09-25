@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Next.js build + static export
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Local env (only .env.example is tracked)
+.env
+.env*.local
+
+# Test + audit output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+lighthouse/
+shots/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
