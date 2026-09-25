@@ -1,0 +1,373 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ *
+ * Design tokens — the single source of truth for the marketing site.
+ * Mirrored in `src/styles/tokens.ts` for three.js / asset generation.
+ * Values match the Flutter app's AppColors dark theme.
+ * ------------------------------------------------------------------ */
+@theme {
+  /* Colors */
+  --color-bg: #070d13;
+  --color-paper: #0c141c;
+  --color-surface: #16212c;
+  --color-surface-alt: #1b2836;
+  --color-line: #26343f;
+  --color-line-strong: #374956;
+  --color-ink: #e7edf2;
+  --color-ink-soft: #b3c1cc;
+  --color-muted: #8595a2;
+  --color-accent: #1ea6c6;
+  --color-accent-bright: #3fc2df;
+  --color-accent-ink: #bfe8f2;
+  --color-accent-wash: #122d38;
+  --color-pending: #e6a848;
+  --color-pending-bg: #3a2c12;
+  --color-go: #4bbd83;
+  --color-go-bg: #12301f;
+  --color-stop: #e0705f;
+  --color-stop-bg: #381914;
+
+  /* Fonts (wired to next/font in layout.tsx) */
+  --font-display: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* Fluid type scale — mobile value → desktop value */
+  --text-hero: clamp(2.5rem, 1.31rem + 4.06vw, 3.75rem);
+  --text-hero--line-height: 1.04;
+  --text-hero--letter-spacing: -0.03em;
+  --text-hero--font-weight: 800;
+
+  --text-h2: clamp(2.125rem, 0.98rem + 3.91vw, 3.25rem);
+  --text-h2--line-height: 1.08;
+  --text-h2--letter-spacing: -0.02em;
+  --text-h2--font-weight: 800;
+
+  --text-h2-sub: clamp(1.875rem, 1.04rem + 2.86vw, 2.75rem);
+  --text-h2-sub--line-height: 1.08;
+  --text-h2-sub--letter-spacing: -0.02em;
+  --text-h2-sub--font-weight: 800;
+
+  --text-h3: clamp(1.1875rem, 0.99rem + 0.68vw, 1.625rem);
+  --text-h3--line-height: 1.2;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 700;
+
+  --text-h4: clamp(1.125rem, 1.04rem + 0.29vw, 1.375rem);
+  --text-h4--line-height: 1.25;
+  --text-h4--letter-spacing: -0.01em;
+  --text-h4--font-weight: 700;
+
+  --text-body-l: clamp(1.0625rem, 0.95rem + 0.39vw, 1.25rem);
+  --text-body-l--line-height: 1.55;
+
+  --text-body: clamp(0.9375rem, 0.89rem + 0.16vw, 1rem);
+  --text-body--line-height: 1.55;
+
+  --text-body-s: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --text-body-s--line-height: 1.5;
+
+  --text-label: clamp(0.625rem, 0.57rem + 0.23vw, 0.8125rem);
+  --text-label--line-height: 1.1;
+  --text-label--letter-spacing: 0.13em;
+  --text-label--font-weight: 600;
+
+  --text-label-s: clamp(0.5625rem, 0.53rem + 0.16vw, 0.6875rem);
+  --text-label-s--line-height: 1.1;
+  --text-label-s--letter-spacing: 0.12em;
+  --text-label-s--font-weight: 600;
+
+  /* Radii */
+  --radius-btn: 12px;
+  --radius-card-sm: 14px;
+  --radius-card-md: 16px;
+  --radius-card: 20px;
+  --radius-panel: 28px;
+  --radius-screen: 38px;
+  --radius-phone: 46px;
+  --radius-pill: 100px;
+
+  /* Shadows & glows */
+  --shadow-deep: 0 40px 80px -10px rgb(0 0 0 / 0.55);
+  --shadow-glow: 0 0 80px rgb(30 166 198 / 0.25);
+  --shadow-glow-btn: 0 8px 28px rgb(30 166 198 / 0.45);
+  --shadow-glow-go: 0 8px 28px rgb(75 189 131 / 0.4);
+  --shadow-glow-stop: 0 0 60px rgb(224 112 95 / 0.18);
+
+  /* Layout */
+  --container-site: 1200px;
+  --spacing-gutter: clamp(1.25rem, -1.19rem + 8.33vw, 7.5rem);
+  --spacing-section: clamp(4.5rem, 2.79rem + 5.86vw, 8rem);
+  --spacing-section-gap: clamp(1.75rem, 0.9rem + 2.93vw, 3.5rem);
+}
+
+/* Tailwind v4 scans the source tree automatically; this keeps class detection
+   working for files outside the default heuristics. */
+@source '../';
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    /* Hero HUD grid pitch. */
+    --hud-grid: 80px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Sticky nav must not cover anchor targets. */
+    scroll-padding-top: 88px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    /* Never allow a stray 3D transform to create a horizontal scrollbar. */
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  /* Visible, accent-coloured focus ring everywhere (WCAG 2.1 AA). */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-accent-wash);
+    color: var(--color-accent-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* 80px HUD grid used behind the hero and the final CTA. */
+  .hud-grid {
+    background-image:
+      linear-gradient(to right, rgb(30 166 198 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(30 166 198 / 0.05) 1px, transparent 1px);
+    background-size: var(--hud-grid) var(--hud-grid);
+  }
+
+  /* Big teal radial glow. */
+  .radial-glow {
+    background: radial-gradient(circle, rgb(30 166 198 / 0.3) 0%, transparent 70%);
+  }
+
+  .radial-glow-go {
+    background: radial-gradient(circle, rgb(75 189 131 / 0.28) 0%, transparent 70%);
+  }
+
+  .radial-glow-stop {
+    background: radial-gradient(circle, rgb(224 112 95 / 0.16) 0%, transparent 70%);
+  }
+
+  /* Glass surface used for raised cards and the push banner. */
+  .glass {
+    background: rgb(22 33 44 / 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--color-line-strong);
+    box-shadow: var(--shadow-deep);
+  }
+
+  /* Perspective wrapper for DOM-based 3D. */
+  .stage-3d {
+    perspective: 1400px;
+    transform-style: preserve-3d;
+  }
+}
+
+@layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+}
+
+/* Marquee for the platforms strip — paused under reduced motion. */
+@keyframes marquee-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes border-shimmer {
+  0%,
+  100% {
+    border-color: rgb(30 166 198 / 0.5);
+  }
+  50% {
+    border-color: rgb(63 194 223 / 0.95);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slow-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Hero composition — pure CSS so the above-the-fold stage never waits
+ * on the animation runtime.
+ * ------------------------------------------------------------------ */
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(-10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-6deg);
+  }
+}
+
+/* Translate only, never opacity: the phone is the largest element in the hero,
+   and starting it at opacity 0 would disqualify it as an LCP candidate until
+   the animation finished, pushing LCP out by the animation's duration. */
+@keyframes phone-in {
+  from {
+    transform: translateY(28px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes phone-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes push-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-26px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Below-the-fold entrances. CSS keyframes rather than observers, so
+ * these sections never need to hydrate.
+ * ------------------------------------------------------------------ */
+
+@keyframes draw-check {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Below-the-fold reveals.
+ *
+ * Where CSS view timelines are supported the animation is driven by the
+ * element entering the viewport, which is what spec §8 asks for. Everywhere
+ * else it falls back to playing on load. No JavaScript in either case, so the
+ * sections that use it stay server components.
+ *
+ *   --reveal-delay   stagger for the time-based fallback
+ *   --reveal-offset  stagger for the scroll-driven range
+ * ------------------------------------------------------------------ */
+@layer utilities {
+  .reveal {
+    animation: fade-up 0.5s ease-out both;
+    animation-delay: var(--reveal-delay, 0s);
+  }
+
+  .reveal-draw {
+    animation: draw-check 0.7s ease-out both;
+    animation-delay: var(--reveal-delay, 0s);
+  }
+
+  @supports (animation-timeline: view()) {
+    .reveal,
+    .reveal-draw {
+      animation-delay: 0s;
+      animation-timeline: view();
+      animation-range: entry calc(15% + var(--reveal-offset, 0%)) entry
+        calc(65% + var(--reveal-offset, 0%));
+    }
+  }
+
+  /* Reduced motion keeps the resting state, which is already the final one. */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal-draw {
+      animation: none;
+    }
+  }
+}

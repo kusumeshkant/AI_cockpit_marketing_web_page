@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="Archivo, Helvetica, Arial, sans-serif">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1EA6C6" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#1EA6C6" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M80 0H0V80" fill="none" stroke="#1EA6C6" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#070D13" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#070D13" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#070D13"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <circle cx="930" cy="300" r="340" fill="url(#glow)"/>
+  <rect y="430" width="1200" height="200" fill="url(#fade)"/>
+
+  <!-- HUD mark + wordmark -->
+  <g transform="translate(80,74)">
+    <circle cx="16" cy="16" r="14.5" fill="none" stroke="#3FC2DF" stroke-width="2" opacity="0.55"/>
+    <circle cx="16" cy="16" r="8.4" fill="none" stroke="#3FC2DF" stroke-width="2.4"/>
+    <circle cx="16" cy="16" r="3" fill="#3FC2DF"/>
+    <text x="46" y="24" fill="#E7EDF2" font-size="25" font-weight="700" letter-spacing="-0.4">AI Cockpit</text>
+  </g>
+
+  <!-- Eyebrow -->
+  <g transform="translate(80,176)">
+    <rect x="0" y="0" width="386" height="40" rx="20" fill="#122D38" stroke="#1EA6C6" stroke-opacity="0.4"/>
+    <circle cx="24" cy="20" r="4.5" fill="#3FC2DF"/>
+    <text x="40" y="26" fill="#BFE8F2" font-family="IBM Plex Mono, Consolas, monospace" font-size="14" font-weight="600" letter-spacing="1.9">HUMAN-IN-THE-LOOP FOR AI AGENTS</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="80" y="298" fill="#E7EDF2" font-size="62" font-weight="800" letter-spacing="-1.9">Your AI agents work.</text>
+  <text x="80" y="368" fill="#3FC2DF" font-size="62" font-weight="800" letter-spacing="-1.9">You stay the pilot.</text>
+
+  <!-- Sub copy -->
+  <text x="80" y="428" fill="#B3C1CC" font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="21">Approve, edit or reject every sensitive agent action</text>
+  <text x="80" y="460" fill="#B3C1CC" font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="21">from your phone — n8n, Make, Zapier or custom code.</text>
+
+  <!-- Trust chips -->
+  <g transform="translate(80,506)" font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="16">
+    <g>
+      <rect x="0" y="0" width="70" height="38" rx="19" fill="#16212C" fill-opacity="0.6" stroke="#26343F"/>
+      <text x="35" y="24" fill="#B3C1CC" text-anchor="middle">n8n</text>
+    </g>
+    <g transform="translate(82,0)">
+      <rect x="0" y="0" width="84" height="38" rx="19" fill="#16212C" fill-opacity="0.6" stroke="#26343F"/>
+      <text x="42" y="24" fill="#B3C1CC" text-anchor="middle">Make</text>
+    </g>
+    <g transform="translate(178,0)">
+      <rect x="0" y="0" width="94" height="38" rx="19" fill="#16212C" fill-opacity="0.6" stroke="#26343F"/>
+      <text x="47" y="24" fill="#B3C1CC" text-anchor="middle">Zapier</text>
+    </g>
+    <g transform="translate(284,0)">
+      <rect x="0" y="0" width="140" height="38" rx="19" fill="#16212C" fill-opacity="0.6" stroke="#26343F"/>
+      <text x="70" y="24" fill="#B3C1CC" text-anchor="middle">Custom code</text>
+    </g>
+  </g>
+
+  <!-- Phone -->
+  <g transform="translate(806,126) rotate(-7 131 215)">
+    <rect x="0" y="0" width="262" height="430" rx="42" fill="#04080C" stroke="#374956" stroke-width="2"/>
+    <rect x="10" y="10" width="242" height="410" rx="34" fill="#0C141C"/>
+
+    <text x="26" y="40" fill="#8595A2" font-family="IBM Plex Mono, Consolas, monospace" font-size="11" font-weight="600">9:41</text>
+    <text x="26" y="72" fill="#E7EDF2" font-size="19" font-weight="700" letter-spacing="-0.3">Pending</text>
+    <text x="236" y="70" fill="#E6A848" font-family="IBM Plex Mono, Consolas, monospace" font-size="10" font-weight="600" letter-spacing="1.3" text-anchor="end">3 WAITING</text>
+
+    <!-- Action rows -->
+    <g font-family="IBM Plex Sans, Segoe UI, sans-serif">
+      <g transform="translate(24,88)">
+        <rect width="214" height="76" rx="14" fill="#16212C" stroke="#26343F"/>
+        <text x="14" y="24" fill="#8595A2" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.1">N8N · JOB AGENT</text>
+        <rect x="140" y="12" width="62" height="18" rx="9" fill="#3A2C12"/>
+        <circle cx="151" cy="21" r="3" fill="#E6A848"/>
+        <text x="159" y="24.5" fill="#E6A848" font-family="IBM Plex Mono, Consolas, monospace" font-size="8" font-weight="600" letter-spacing="1">PENDING</text>
+        <text x="14" y="46" fill="#E7EDF2" font-size="12.5" font-weight="600">Apply: Senior Flutter @ Acme</text>
+        <text x="14" y="64" fill="#8595A2" font-size="10.5">Tailored application ready to send</text>
+      </g>
+
+      <g transform="translate(24,174)">
+        <rect width="214" height="76" rx="14" fill="#16212C" stroke="#26343F"/>
+        <text x="14" y="24" fill="#8595A2" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.1">MAKE · INVOICE AGENT</text>
+        <rect x="140" y="12" width="62" height="18" rx="9" fill="#3A2C12"/>
+        <circle cx="151" cy="21" r="3" fill="#E6A848"/>
+        <text x="159" y="24.5" fill="#E6A848" font-family="IBM Plex Mono, Consolas, monospace" font-size="8" font-weight="600" letter-spacing="1">PENDING</text>
+        <text x="14" y="46" fill="#E7EDF2" font-size="12.5" font-weight="600">Pay invoice #1042 — $2,400</text>
+        <text x="14" y="64" fill="#8595A2" font-size="10.5">Vendor: Northwind Supplies</text>
+      </g>
+
+      <g transform="translate(24,260)">
+        <rect width="214" height="76" rx="14" fill="#16212C" stroke="#26343F"/>
+        <text x="14" y="24" fill="#8595A2" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.1">CUSTOM · SALES AGENT</text>
+        <rect x="140" y="12" width="62" height="18" rx="9" fill="#3A2C12"/>
+        <circle cx="151" cy="21" r="3" fill="#E6A848"/>
+        <text x="159" y="24.5" fill="#E6A848" font-family="IBM Plex Mono, Consolas, monospace" font-size="8" font-weight="600" letter-spacing="1">PENDING</text>
+        <text x="14" y="46" fill="#E7EDF2" font-size="12.5" font-weight="600">Follow-up to 12 warm leads</text>
+        <text x="14" y="64" fill="#8595A2" font-size="10.5">Personalised emails drafted</text>
+      </g>
+    </g>
+
+    <line x1="10" y1="358" x2="252" y2="358" stroke="#26343F"/>
+    <g font-family="IBM Plex Mono, Consolas, monospace" font-size="8.5" font-weight="600" letter-spacing="1">
+      <text x="40" y="382" fill="#3FC2DF" text-anchor="middle">ACTIONS</text>
+      <text x="101" y="382" fill="#8595A2" text-anchor="middle">CONNECT</text>
+      <text x="160" y="382" fill="#8595A2" text-anchor="middle">AUDIT</text>
+      <text x="221" y="382" fill="#8595A2" text-anchor="middle">SETTINGS</text>
+    </g>
+  </g>
+
+  <!-- Push banner -->
+  <g transform="translate(748,150)">
+    <rect width="270" height="72" rx="16" fill="#1B2836" fill-opacity="0.95" stroke="#374956"/>
+    <rect x="12" y="16" width="36" height="36" rx="10" fill="#070D13" stroke="#374956"/>
+    <circle cx="30" cy="34" r="9" fill="none" stroke="#3FC2DF" stroke-width="1.3" opacity="0.55"/>
+    <circle cx="30" cy="34" r="5" fill="none" stroke="#3FC2DF" stroke-width="1.6"/>
+    <circle cx="30" cy="34" r="1.9" fill="#3FC2DF"/>
+    <text x="58" y="27" fill="#3FC2DF" font-family="IBM Plex Mono, Consolas, monospace" font-size="9" font-weight="600" letter-spacing="1.1">AI COCKPIT · NOW</text>
+    <text x="58" y="45" fill="#E7EDF2" font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="12.5" font-weight="600">n8n Job agent needs approval</text>
+    <text x="58" y="61" fill="#B3C1CC" font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="11">Apply: Senior Flutter @ Acme</text>
+  </g>
+</svg>

@@ -57,11 +57,11 @@ npm run dev                    # http://localhost:3000
 
 ## Environment variables
 
-| Variable | Required | Purpose |
-|---|---|---|
-| `NEXT_PUBLIC_DEMO_URL` | For production | The Cal.com / Calendly link behind **every** "Book a demo" and "Get early access" button. Falls back to `#book-demo` when unset, which keeps the page usable locally. |
+| Variable               | Required       | Purpose                                                                                                                                                                                               |
+| ---------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_DEMO_URL` | For production | The Cal.com / Calendly link behind **every** "Book a demo" and "Get early access" button. Falls back to `#book-demo` when unset, which keeps the page usable locally.                                 |
 | `NEXT_PUBLIC_SITE_URL` | For production | Absolute origin, used for the canonical URL and Open Graph tags. **No fallback:** when unset, the canonical, `og:url` and the social-card image are omitted rather than pointing at a guessed domain. |
-| `NEXT_PUBLIC_NOINDEX` | Staging only | `"true"` emits `<meta name="robots" content="noindex, nofollow">` and a `robots.txt` containing `Disallow: /`. Anything else (including unset) leaves the site indexable. |
+| `NEXT_PUBLIC_NOINDEX`  | Staging only   | `"true"` emits `<meta name="robots" content="noindex, nofollow">` and a `robots.txt` containing `Disallow: /`. Anything else (including unset) leaves the site indexable.                             |
 
 All three are inlined at build time, so **a change requires a rebuild**, not just a redeploy of
 `out/`. Copy `.env.example` to `.env.local` to set them for local development.
@@ -88,14 +88,17 @@ src/
   content/site.ts every string and link on the site
   styles/tokens.ts token values mirrored for TS (three.js, asset generation)
   components/
-    ui/           Button, Pill, Eyebrow, Card/GlassCard, Container, Section, Logo, icons/
+    ui/           Button, Pill, Eyebrow, Container, Section, Logo, icons/, cn
     mock/         PhoneFrame, ActionCard, PushBanner, FeedScreen, DetailScreen
     motion/       MotionRoot (LazyMotion), features (lazy feature bundle), useInView
     three/        HeroScene + OrbitRing / AgentNode / SignalParticles, capability hooks
     sections/     Nav, Hero, Platforms, Problem, HowItWorks, ApproveMoment, UseCases,
                   Consultants, Security, Pricing, Faq, FinalCta, Footer, StickyCta
-    DemoModal.tsx
-tests/smoke.spec.ts
+                  — plus the client leaves the server sections mount:
+                  HeroStage, TiltCard, and the lazy scroll layers
+                  ProblemStage / HowItWorksStage / ApproveStage
+    DemoModal.tsx, WatchDemoButton.tsx
+tests/            smoke.spec.ts (browser), headers.spec.ts (exported _headers)
 assets/og-image.svg    source artwork for the generated images
 scripts/generate-assets.mjs
 ```
@@ -137,11 +140,11 @@ real host the variables below are no longer a confound.
 
 Latest median of 5, against the production static export:
 
-| | Perf | A11y | Best practices | SEO | LCP | CLS | TBT |
-|---|---|---|---|---|---|---|---|
-| **Mobile** | 89 | 100 | 100 | 100 | 2764 ms | 0.000 | 326 ms |
-| **Desktop** | 100 | 100 | 100 | 100 | 592 ms | 0.000 | 38 ms |
-| Target (spec §2) | ≥ 90 | ≥ 95 | ≥ 95 | ≥ 95 | < 2500 ms | < 0.05 | — |
+|                  | Perf | A11y | Best practices | SEO  | LCP       | CLS    | TBT    |
+| ---------------- | ---- | ---- | -------------- | ---- | --------- | ------ | ------ |
+| **Mobile**       | 89   | 100  | 100            | 100  | 2764 ms   | 0.000  | 326 ms |
+| **Desktop**      | 100  | 100  | 100            | 100  | 592 ms    | 0.000  | 38 ms  |
+| Target (spec §2) | ≥ 90 | ≥ 95 | ≥ 95           | ≥ 95 | < 2500 ms | < 0.05 | —      |
 
 Accessibility, best practices, SEO, CLS and desktop performance all clear the bar. Mobile
 performance sits at the threshold (spread across runs: 76 / 89 / 89 / 91 / 91) and mobile LCP
@@ -151,7 +154,7 @@ A control page served from the same local server — one `<h1>`, one inline `<st
 JavaScript, no fonts, no images — measures **LCP 2788 ms** under the same mobile profile. The
 full marketing site measures 2764 ms. In other words the page adds nothing measurable over an
 empty document; the number is Lantern's simulation of connection setup against a plain
-HTTP/1.1 origin with no CDN, no HTTP/2 and no cache headers. The *observed* (unthrottled) LCP
+HTTP/1.1 origin with no CDN, no HTTP/2 and no cache headers. The _observed_ (unthrottled) LCP
 in the same trace is **172 ms**.
 
 Re-measure against the real deployment before treating mobile LCP as a defect: a CDN host
@@ -161,15 +164,15 @@ Re-measure against the real deployment before treating mobile LCP as a defect: a
 ### Bundle budget
 
 The spec's budget is **≤ 180 KB gzip of initial JS**, excluding the lazy 3D chunk. The build
-lands at **153 KB** because neither animation library is on the critical path:
+lands at **150 KB** because neither animation library is on the critical path:
 
-| Layer | gzip | When it loads |
-|---|---|---|
-| React + React DOM + Next App Router runtime | 138.9 KB | initial |
-| Site code (all 13 sections, server-rendered) | 14.1 KB | initial |
-| **Initial total** | **153.0 KB** | |
-| Framer Motion (core + `domAnimation` + scroll hooks) | 35.4 KB | on scroll, per scene |
-| three.js + R3F + drei | 250.5 KB | desktop only, after `requestIdleCallback` |
+| Layer                                                | gzip         | When it loads                             |
+| ---------------------------------------------------- | ------------ | ----------------------------------------- |
+| React + React DOM + Next App Router runtime          | 130.5 KB     | initial                                   |
+| Site code (all 13 sections, server-rendered)         | 19.2 KB      | initial                                   |
+| **Initial total**                                    | **149.7 KB** |                                           |
+| Framer Motion (core + `domAnimation` + scroll hooks) | 35.4 KB      | on scroll, per scene                      |
+| three.js + R3F + drei                                | 250.5 KB     | desktop only, after `requestIdleCallback` |
 
 How that is achieved:
 
@@ -188,9 +191,23 @@ How that is achieved:
    check-draw and bubble stagger are CSS keyframes; Use cases hydrates only a tilt leaf.
 5. **CSS is inlined** (`experimental.inlineCss`), removing a render-blocking request, and the
    font set is trimmed to the weights actually used, with mono excluded from preload.
+6. **Below-the-fold reveals are CSS view timelines** (`animation-timeline: view()`), falling
+   back to an on-load animation where they are unsupported. Security and Consultants animate
+   on scroll without hydrating.
+
+### Content Security Policy
+
+Next's static export ships the RSC payload as inline `<script>` blocks, and a static site has no
+request-time nonce. `npm run build` therefore runs `scripts/csp-headers.mjs` as a `postbuild`
+step: it hashes every inline script in `out/` and substitutes them into the `script-src` of
+`out/_headers`, so the policy needs no `'unsafe-inline'`.
+
+`tests/headers.spec.ts` fails the suite if any inline script is left unhashed. Without it the
+site hydrates fine locally — `serve` ignores `_headers` — and silently fails to hydrate on
+Cloudflare.
 
 Two tests keep this honest: one asserts that no script referenced by the initial HTML contains
-Framer Motion or three.js, and another asserts the motion chunk *does* arrive once you scroll.
+Framer Motion or three.js, and another asserts the motion chunk _does_ arrive once you scroll.
 
 ### 3D and reduced motion
 
@@ -229,13 +246,13 @@ subdomain used until the real domain is chosen.
    - Build command: `npm run build`
    - Build output directory: `out`
    - Root directory: repository root (this project is the whole repo)
-3. **Environment variables** (Settings → Environment variables, Production *and* Preview):
+3. **Environment variables** (Settings → Environment variables, Production _and_ Preview):
 
-   | Variable | Staging value |
-   |---|---|
-   | `NEXT_PUBLIC_DEMO_URL` | the Cal.com / Calendly link |
+   | Variable               | Staging value                  |
+   | ---------------------- | ------------------------------ |
+   | `NEXT_PUBLIC_DEMO_URL` | the Cal.com / Calendly link    |
    | `NEXT_PUBLIC_SITE_URL` | `https://aicockpit.dqstore.in` |
-   | `NEXT_PUBLIC_NOINDEX` | `true` |
+   | `NEXT_PUBLIC_NOINDEX`  | `true`                         |
 
 4. **Custom domain** — Pages project → Custom domains → add `aicockpit.dqstore.in`, then at the
    DNS provider for `dqstore.in` add a **CNAME** record:
@@ -245,6 +262,7 @@ subdomain used until the real domain is chosen.
    ```
 
    Cloudflare issues the certificate once the record resolves.
+
 5. **When the real domain goes live** — point it at the same project, set
    `NEXT_PUBLIC_SITE_URL` to the new origin, **remove `NEXT_PUBLIC_NOINDEX`** (or set it to
    `false`) and redeploy. Leaving it on would keep the production site out of search results.
@@ -279,15 +297,15 @@ npm run lighthouse -- --url https://aicockpit.dqstore.in
 Each of these follows the spec's own acceptance bar (§2) over its literal wording, and each is
 commented at the site of the change.
 
-| Spec | Shipped | Why |
-|---|---|---|
-| §6 Button: primary is "accent fill, **white text**, glow" | Accent fill, **dark ink** (`--color-bg`, `#070D13`) | White on `#1EA6C6` measures **2.86:1** — below the 4.5:1 WCAG AA minimum required by §2.5, and Lighthouse flags it. Dark ink on the same fill measures **6.8:1**. The same change applies to the accent chat bubble in the consultants panel. **Open for review — decide from the screenshots.** |
-| §6 ActionCard: "Approved cards at **60% opacity**" | No opacity; decided cards recede via a softer border and `inkSoft` title | Dimming the whole card drops its label text to ~2.7:1 and its status pills to ~3.1:1. The de-emphasis reads the same at full contrast. |
-| §5 folder list includes `tailwind.config.ts` | No config file; tokens live in `@theme` in `globals.css` | Tailwind 4 is CSS-first and treats the config file as legacy. Keeping one would split the token definitions in two, against §2.7. |
-| §3 "Foreground 3D driven by Framer Motion" | Framer Motion drives the three scroll scenes; the hero and the cheap effects are CSS | Framer Motion's runtime is 35 KB gzip. Keeping it out of the hero and off the critical path is what brings initial JS to 153 KB against §2.4's 180 KB budget. It is still the animation library for every scroll-linked scene. |
-| §7.11 FAQ: "`<details>`/button with `aria-expanded`" | Native `<details>`/`<summary>` | `<summary>` already exposes the expanded state; adding `aria-expanded` would duplicate it. Removing the state also lets the whole section stay a server component. |
-| §7.2/§8 mobile hero: "static poster of the stage" | The DOM phone composition renders at all widths; `hero-poster.webp` is used for `prefers-reduced-motion` | §8 explicitly permits the DOM composition "if it stays cheap". It is cheaper than downloading the poster, and stays crisp. The poster still ships and is still used. |
-| §4.3 "Container: max-width 1200px, side padding 120px" | 1200px is the **content** width; the gutter sits outside it (1440px frame) | With the padding inside 1200px, the content column is 960px — too narrow for §7.2's 700px copy column beside the phone, and the H1 wrapped to three lines. |
+| Spec                                                      | Shipped                                                                                                  | Why                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §6 Button: primary is "accent fill, **white text**, glow" | Accent fill, **dark ink** (`--color-bg`, `#070D13`)                                                      | White on `#1EA6C6` measures **2.86:1** — below the 4.5:1 WCAG AA minimum required by §2.5, and Lighthouse flags it. Dark ink on the same fill measures **6.8:1**. The same change applies to the accent chat bubble in the consultants panel. **Accepted.** |
+| §6 ActionCard: "Approved cards at **60% opacity**"        | No opacity; decided cards recede via a softer border and `inkSoft` title                                 | Dimming the whole card drops its label text to ~2.7:1 and its status pills to ~3.1:1. The de-emphasis reads the same at full contrast.                                                                                                                      |
+| §5 folder list includes `tailwind.config.ts`              | No config file; tokens live in `@theme` in `globals.css`                                                 | Tailwind 4 is CSS-first and treats the config file as legacy. Keeping one would split the token definitions in two, against §2.7.                                                                                                                           |
+| §3 "Foreground 3D driven by Framer Motion"                | Framer Motion drives the three scroll scenes; the hero and the cheap effects are CSS                     | Framer Motion's runtime is 35 KB gzip. Keeping it out of the hero and off the critical path is what brings initial JS to 153 KB against §2.4's 180 KB budget. It is still the animation library for every scroll-linked scene.                              |
+| §7.11 FAQ: "`<details>`/button with `aria-expanded`"      | Native `<details>`/`<summary>`                                                                           | `<summary>` already exposes the expanded state; adding `aria-expanded` would duplicate it. Removing the state also lets the whole section stay a server component.                                                                                          |
+| §7.2/§8 mobile hero: "static poster of the stage"         | The DOM phone composition renders at all widths; `hero-poster.webp` is used for `prefers-reduced-motion` | §8 explicitly permits the DOM composition "if it stays cheap". It is cheaper than downloading the poster, and stays crisp. The poster still ships and is still used.                                                                                        |
+| §4.3 "Container: max-width 1200px, side padding 120px"    | 1200px is the **content** width; the gutter sits outside it (1440px frame)                               | With the padding inside 1200px, the content column is 960px — too narrow for §7.2's 700px copy column beside the phone, and the H1 wrapped to three lines.                                                                                                  |
 
 ---
 
