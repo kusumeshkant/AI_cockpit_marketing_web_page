@@ -6,6 +6,14 @@ import { expect, test } from '@playwright/test';
 const OUT = join(process.cwd(), 'out');
 const INLINE_SCRIPT = /<script(?![^>]*\ssrc=)([^>]*)>([\s\S]*?)<\/script>/gi;
 
+/** `_headers` minus its comment block, i.e. only the directives Cloudflare applies. */
+function activeDirectives(headers: string): string {
+  return headers
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('#'))
+    .join('\n');
+}
+
 async function htmlFiles(dir: string): Promise<string[]> {
   const found: string[] = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -17,16 +25,18 @@ async function htmlFiles(dir: string): Promise<string[]> {
 }
 
 /**
- * The deployed CSP is never exercised by the browser tests — `serve` ignores
- * `_headers` — so it is verified against the build output instead. Without this
- * the site would hydrate locally and silently fail to hydrate on Cloudflare.
+ * The deployed headers are never exercised by the browser tests — `serve`
+ * ignores `_headers` — so they are verified against the build output instead.
+ * Without this the site would hydrate locally and silently fail to hydrate on
+ * Cloudflare, because the CSP would refuse Next's inline RSC scripts.
  */
 test.describe('exported _headers', () => {
   test('every inline script is covered by a CSP hash', async () => {
     const headers = await readFile(join(OUT, '_headers'), 'utf8');
 
-    expect(headers, 'the build-time placeholder was never substituted').not.toContain(
-      '__INLINE_SCRIPT_HASHES__',
+    // Placeholders legitimately survive inside the explanatory comment block.
+    expect(activeDirectives(headers), 'a build-time placeholder was never substituted').not.toMatch(
+      /__[A-Z_]+__/,
     );
 
     const missing: string[] = [];
@@ -47,7 +57,7 @@ test.describe('exported _headers', () => {
 
   test('the policy does not fall back to unsafe-inline scripts', async () => {
     const headers = await readFile(join(OUT, '_headers'), 'utf8');
-    const csp = headers
+    const csp = activeDirectives(headers)
       .split('\n')
       .find((line) => line.trim().startsWith('Content-Security-Policy:'));
 
@@ -57,8 +67,18 @@ test.describe('exported _headers', () => {
     expect(scriptSrc).toContain("'sha256-");
   });
 
+  test('X-Robots-Tag tracks NEXT_PUBLIC_NOINDEX', async () => {
+    const active = activeDirectives(await readFile(join(OUT, '_headers'), 'utf8'));
+
+    if (process.env.NEXT_PUBLIC_NOINDEX === 'true') {
+      expect(active).toContain('X-Robots-Tag: noindex, nofollow');
+    } else {
+      expect(active).not.toContain('X-Robots-Tag');
+    }
+  });
+
   test('security headers are present', async () => {
-    const headers = await readFile(join(OUT, '_headers'), 'utf8');
+    const active = activeDirectives(await readFile(join(OUT, '_headers'), 'utf8'));
     for (const header of [
       'X-Content-Type-Options: nosniff',
       'Referrer-Policy: strict-origin-when-cross-origin',
@@ -66,7 +86,7 @@ test.describe('exported _headers', () => {
       'Strict-Transport-Security:',
       'Cache-Control: public, max-age=31536000, immutable',
     ]) {
-      expect(headers).toContain(header);
+      expect(active).toContain(header);
     }
   });
 });
