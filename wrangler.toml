@@ -12,4 +12,4 @@ compatibility_date = "2026-09-01"
 binding = "DB"
 database_name = "ai-cockpit-inquiries"
 # Filled in by `wrangler d1 create ai-cockpit-inquiries`.
-database_id = "PLACEHOLDER_SET_BY_D1_CREATE"
+database_id = "3bf1c9a2-f9f8-49d7-887b-ccd0fa20b79e"

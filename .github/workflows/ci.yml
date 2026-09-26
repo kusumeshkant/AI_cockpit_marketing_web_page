@@ -93,6 +93,17 @@ jobs:
       pull-requests: write # only for the preview-URL comment
 
     steps:
+      # The Pages Functions in ./functions and their bindings in wrangler.toml
+      # are compiled by `pages deploy` from the working directory. Without a
+      # checkout the deploy is static assets only, and /api/inquiry 405s.
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            functions
+            src/lib
+            wrangler.toml
+          sparse-checkout-cone-mode: false
+
       - name: Download the tested static export
         uses: actions/download-artifact@v8
         with:
