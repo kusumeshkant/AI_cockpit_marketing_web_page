@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { cta, DEMO_URL, nav } from '@/content/site';
-import { Button } from '../ui/Button';
+import { nav } from '@/content/site';
 import { cn } from '../ui/cn';
 import { Container } from '../ui/Container';
 import { CloseIcon, MenuIcon } from '../ui/icons';
 import { Logo } from '../ui/Logo';
+import { RequestDemoButton } from '../inquiry/RequestDemoButton';
 
 /** Sticky top navigation. Gains a blurred background once the page scrolls. */
 export function Nav() {
@@ -64,9 +64,7 @@ export function Nav() {
         </nav>
 
         <div className="hidden lg:block">
-          <Button href={DEMO_URL} size="sm" data-cta="book-demo">
-            {cta.primary}
-          </Button>
+          <RequestDemoButton size="sm" />
         </div>
 
         <button
@@ -115,9 +113,7 @@ export function Nav() {
                 </a>
               ))}
             </nav>
-            <Button href={DEMO_URL} className="mt-6 w-full" data-cta="book-demo">
-              {cta.primary}
-            </Button>
+            <RequestDemoButton className="mt-6 w-full" />
           </Container>
         </div>
       ) : null}

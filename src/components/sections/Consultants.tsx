@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
-import { consultants, cta, DEMO_URL } from '@/content/site';
+import { consultants, cta } from '@/content/site';
 import { Button } from '../ui/Button';
+import { RequestDemoButton } from '../inquiry/RequestDemoButton';
 import { cn } from '../ui/cn';
 import { Container } from '../ui/Container';
 import { Eyebrow } from '../ui/Eyebrow';
@@ -40,9 +41,7 @@ export function Consultants() {
                 </ul>
 
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-                  <Button href={DEMO_URL} className="w-full sm:w-auto" data-cta="book-demo">
-                    {cta.primary}
-                  </Button>
+                  <RequestDemoButton className="w-full sm:w-auto" />
                   <Button href="#pricing" variant="ghost">
                     {cta.consultantPlan}
                   </Button>

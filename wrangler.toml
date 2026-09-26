@@ -1,0 +1,30 @@
+# Bindings for the Cloudflare Pages Functions in ./functions.
+#
+# This file declares bindings ONLY. The site is a Next.js static export deployed
+# with `wrangler pages deploy out`; nothing here switches the project to
+# OpenNext or a Worker build.
+#
+# Environments
+# ------------
+# Top-level keys apply to local development, preview AND production. There are
+# deliberately no [env.preview] / [env.production] sections: overriding any one
+# non-inheritable key in an environment forces every non-inheritable key to be
+# repeated there, which is an easy way to silently drop the D1 binding from one
+# environment. One declaration, both environments.
+#
+# Runtime secrets (TURNSTILE_SECRET_KEY, RESEND_API_KEY, INQUIRY_FROM_EMAIL,
+# INQUIRY_TO_EMAIL, IP_HASH_SALT) are NOT here — they are Pages secrets, set
+# separately for production and preview. CF_PAGES_BRANCH is injected by Pages.
+
+name = "ai-cockpit"
+pages_build_output_dir = "out"
+
+# Pinned so preview and production run the same runtime. The dashboard had them
+# drifting apart (preview 2026-09-01, production 2026-09-25); this takes the
+# newer of the two so production does not regress and preview catches up.
+compatibility_date = "2026-09-25"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-cockpit-inquiries"
+database_id = "3bf1c9a2-f9f8-49d7-887b-ccd0fa20b79e"
