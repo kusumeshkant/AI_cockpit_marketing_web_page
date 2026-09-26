@@ -585,9 +585,12 @@ export const inquiry = {
   },
 
   success: {
-    /** `{name}` is replaced with the visitor's first name. */
-    title: 'Thanks, {name} — we will reach out within 24 hours.',
-    body: 'Keep an eye on your phone and inbox. If anything changes, just reply to our message.',
+    /**
+     * `{name}` is replaced with the visitor's first name. The space after the
+     * em dash is non-breaking, so the line never wraps as "— we / will".
+     */
+    title: 'Thanks, {name} \u2014\u00A0we\u2019ll reach out within 24 hours.',
+    body: 'We\u2019ll contact you on the number you shared. Talk soon!',
   },
 
   /** Turnstile is a script, so a submission without JavaScript cannot work. */

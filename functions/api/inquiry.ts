@@ -181,7 +181,10 @@ async function sendNotification(
     )
     .join('')}</table>`;
 
-  const roleLabel = value.role ? (ROLE_LABELS[value.role] ?? value.role) : 'n/a';
+  // No role given means no brackets at all — "(n/a)" in a subject line reads
+  // like something broke.
+  const roleLabel = value.role ? (ROLE_LABELS[value.role] ?? value.role) : '';
+  const roleSuffix = roleLabel ? ` (${roleLabel})` : '';
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
@@ -193,7 +196,7 @@ async function sendNotification(
       body: JSON.stringify({
         from: env.INQUIRY_FROM_EMAIL,
         to: [env.INQUIRY_TO_EMAIL],
-        subject: `${subjectPrefix}New demo request — ${value.name} (${roleLabel})`,
+        subject: `${subjectPrefix}New demo request — ${value.name}${roleSuffix}`,
         text,
         html,
         ...(value.email ? { reply_to: value.email } : {}),

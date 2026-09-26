@@ -97,6 +97,9 @@ test('a successful submit shows the first name back', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Request a demo' }).click();
 
   await expect(dialog.getByText(/Thanks, Asha/)).toBeVisible();
+  // We phone people; we never email them, so the copy must not promise an inbox.
+  await expect(dialog.getByText(/contact you on the number you shared/)).toBeVisible();
+  await expect(dialog.getByText(/inbox/i)).toHaveCount(0);
 });
 
 test('an error keeps the typed values so nothing is retyped', async ({ page }) => {

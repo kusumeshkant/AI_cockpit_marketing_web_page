@@ -380,3 +380,32 @@ test.describe('production vs preview', () => {
     expect(recorded.emails[0]!.subject).toMatch(/^\[PREVIEW\] New demo request — /);
   });
 });
+
+test.describe('notification subject', () => {
+  test('names the role when one was given', async () => {
+    const { recorded, restore } = mockFetch();
+    await onRequest({
+      request: post({ ...goodBody, role: 'consultant' }),
+      env: makeEnv({ CF_PAGES_BRANCH: 'main' }).env,
+    });
+    restore();
+
+    expect(recorded.emails[0]!.subject).toBe(
+      'New demo request — Asha Menon (Automation consultant / agency)',
+    );
+  });
+
+  test('omits the brackets entirely when no role was given', async () => {
+    const { recorded, restore } = mockFetch();
+    const body = { ...goodBody };
+    delete (body as Record<string, unknown>).role;
+
+    await onRequest({ request: post(body), env: makeEnv({ CF_PAGES_BRANCH: 'main' }).env });
+    restore();
+
+    const subject = recorded.emails[0]!.subject!;
+    expect(subject).toBe('New demo request — Asha Menon');
+    expect(subject).not.toContain('n/a');
+    expect(subject).not.toContain('()');
+  });
+});
