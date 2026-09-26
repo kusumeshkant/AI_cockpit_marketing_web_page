@@ -34,7 +34,7 @@ The Figma file is visual reference only. Where the shipped site departs from the
 ```bash
 cd product/marketing_page
 npm install
-cp .env.example .env.local     # then fill in NEXT_PUBLIC_DEMO_URL
+cp .env.example .env.local     # optional: site URL, noindex, Turnstile key
 npm run dev                    # http://localhost:3000
 ```
 
@@ -59,12 +59,14 @@ npm run dev                    # http://localhost:3000
 
 | Variable               | Required       | Purpose                                                                                                                                                                                               |
 | ---------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_DEMO_URL` | For production | The Cal.com / Calendly link behind **every** "Book a demo" and "Get early access" button. Falls back to `#book-demo` when unset, which keeps the page usable locally.                                 |
 | `NEXT_PUBLIC_SITE_URL` | For production | Absolute origin, used for the canonical URL and Open Graph tags. **No fallback:** when unset, the canonical, `og:url` and the social-card image are omitted rather than pointing at a guessed domain. |
 | `NEXT_PUBLIC_NOINDEX`  | Staging only   | `"true"` emits `<meta name="robots" content="noindex, nofollow">` and a `robots.txt` containing `Disallow: /`. Anything else (including unset) leaves the site indexable.                             |
 
-All three are inlined at build time, so **a change requires a rebuild**, not just a redeploy of
-`out/`. Copy `.env.example` to `.env.local` to set them for local development.
+All of these are inlined at build time, so **a change requires a rebuild**, not just a redeploy
+of `out/`. Copy `.env.example` to `.env.local` to set them for local development.
+
+The demo request endpoint also needs runtime secrets, which never appear in the repository —
+see [Demo inquiries](#demo-inquiries).
 
 ---
 
@@ -80,6 +82,84 @@ tokens (`bg-surface`, `text-h2`, `rounded-(--radius-panel)`, `shadow-(--shadow-d
 
 ---
 
+## Demo inquiries
+
+The only server-side code on the site: `functions/api/inquiry.ts`, a Cloudflare Pages Function.
+The site itself stays a static export.
+
+A visitor fills the form — in the dialog behind any "Request a demo" CTA, or in the
+`#request-demo` section — and the endpoint stores the submission in Cloudflare D1 and emails a
+notification. There is no calendar booking; you follow up yourself.
+
+### The request path
+
+1. **Method, size, origin.** POST only, 10 KB cap, `Origin` must match the request host.
+2. **Unknown fields are rejected** outright.
+3. **Spam signals** — a honeypot field and a minimum time-to-submit. Both answer with a normal
+   `200 {ok:true}` so a bot learns nothing about which check caught it, and nothing is stored.
+4. **Turnstile** is verified server-side, before anything is written.
+5. **Validation** runs the same rules as the browser, from `src/lib/inquiry.ts`.
+6. **Rate limit** — 5 per IP per hour, counted against a salted SHA-256 hash. The raw address is
+   never stored.
+7. **Insert**, then **email**. A failed email still returns success, because the row is safe and
+   the inquiry must not be lost.
+
+Responses: `200 {ok:true}` · `400 {ok:false, errors}` · `403 turnstile_failed` ·
+`405 method_not_allowed` · `413 payload_too_large` · `429 rate_limited` · `500 server`.
+
+Nothing a visitor typed is ever logged — not names, phones, emails or messages. The only thing
+written to the console is a short non-PII code such as `inquiry:rate_limited`.
+
+### Secrets and bindings
+
+Set as Cloudflare Pages secrets (each prompts, so the value never reaches a shell history):
+
+```bash
+wrangler pages secret put TURNSTILE_SECRET_KEY --project-name ai-cockpit
+wrangler pages secret put RESEND_API_KEY       --project-name ai-cockpit
+wrangler pages secret put INQUIRY_TO_EMAIL     --project-name ai-cockpit
+wrangler pages secret put INQUIRY_FROM_EMAIL   --project-name ai-cockpit
+wrangler pages secret put IP_HASH_SALT         --project-name ai-cockpit   # optional
+```
+
+Both email addresses come from the environment, so neither appears in this public repository.
+`IP_HASH_SALT` is optional; without it the Turnstile secret is used as the salt.
+
+`wrangler.toml` declares the D1 binding `DB` and nothing else — it does not switch the project
+to a Worker build.
+
+### Database
+
+```bash
+wrangler d1 create ai-cockpit-inquiries          # then paste the id into wrangler.toml
+wrangler d1 execute ai-cockpit-inquiries --remote --file migrations/0001_create_inquiry.sql
+```
+
+### Reading new inquiries
+
+```bash
+# The 20 most recent, newest first
+wrangler d1 execute ai-cockpit-inquiries --remote --command   "SELECT id, created_at, name, phone, email, company, role, tools, best_time, message
+     FROM inquiry ORDER BY created_at DESC LIMIT 20"
+
+# Just the count for today
+wrangler d1 execute ai-cockpit-inquiries --remote --command   "SELECT COUNT(*) FROM inquiry WHERE created_at > date('now')"
+```
+
+Retention is 12 months (see `/privacy`). To honour a deletion request:
+
+```bash
+wrangler d1 execute ai-cockpit-inquiries --remote --command   "DELETE FROM inquiry WHERE id = <id>"
+```
+
+### Privacy page
+
+`/privacy` explains what the form collects, why, where it is stored and how to have it deleted.
+It is currently marked **Draft — review before public launch**, and it deliberately names no
+email address: it tells people to reply to any message they have had from us.
+
+---
+
 ## Architecture
 
 ```
@@ -92,13 +172,21 @@ src/
     mock/         PhoneFrame, ActionCard, PushBanner, FeedScreen, DetailScreen
     motion/       MotionRoot (LazyMotion), features (lazy feature bundle), useInView
     three/        HeroScene + OrbitRing / AgentNode / SignalParticles, capability hooks
+    inquiry/      RequestDemoButton (every CTA), DemoModalHost (lazy dialog),
+                  InquiryForm, Turnstile, demoModalStore
     sections/     Nav, Hero, Platforms, Problem, HowItWorks, ApproveMoment, UseCases,
-                  Consultants, Security, Pricing, Faq, FinalCta, Footer, StickyCta
+                  Consultants, Security, Pricing, Faq, RequestDemo, FinalCta,
+                  Footer, StickyCta
                   — plus the client leaves the server sections mount:
                   HeroStage, TiltCard, and the lazy scroll layers
                   ProblemStage / HowItWorksStage / ApproveStage
     DemoModal.tsx, WatchDemoButton.tsx
-tests/            smoke.spec.ts (browser), headers.spec.ts (exported _headers)
+  lib/inquiry.ts  validation shared by the form and the Pages Function
+functions/
+  api/inquiry.ts  the demo request endpoint (Cloudflare Pages Function)
+migrations/       D1 schema
+tests/            smoke.spec.ts · headers.spec.ts · inquiry-form.spec.ts (browser)
+                  inquiry-schema.spec.ts · inquiry-api.spec.ts (no browser)
 assets/og-image.svg    source artwork for the generated images
 scripts/generate-assets.mjs
 ```
@@ -270,8 +358,9 @@ cancels one in flight.
 Variables (not secret — they are baked into the public bundle):
 
 ```bash
-gh variable set NEXT_PUBLIC_SITE_URL --body https://aicockpit.dqstore.in
-gh variable set NEXT_PUBLIC_NOINDEX  --body true
+gh variable set NEXT_PUBLIC_SITE_URL           --body https://aicockpit.dqstore.in
+gh variable set NEXT_PUBLIC_NOINDEX            --body true
+gh variable set NEXT_PUBLIC_TURNSTILE_SITE_KEY --body <site key>
 ```
 
 Secrets:
@@ -280,6 +369,9 @@ Secrets:
 gh secret set CLOUDFLARE_API_TOKEN    # prompts, so the value never reaches a shell history
 gh secret set CLOUDFLARE_ACCOUNT_ID
 ```
+
+The inquiry endpoint's own secrets are Cloudflare Pages secrets, not GitHub secrets — see
+[Demo inquiries](#demo-inquiries).
 
 The API token is a **custom token** from Cloudflare → My Profile → API Tokens, scoped to the
 minimum: **Account → Cloudflare Pages → Edit**, limited to this account. Adding the custom

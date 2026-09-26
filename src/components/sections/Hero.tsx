@@ -1,6 +1,6 @@
-import { cta, DEMO_URL, hero } from '@/content/site';
+import { hero } from '@/content/site';
 import { WatchDemoButton } from '../WatchDemoButton';
-import { Button } from '../ui/Button';
+import { RequestDemoButton } from '../inquiry/RequestDemoButton';
 import { Container } from '../ui/Container';
 import { HeroEyebrow } from '../ui/Eyebrow';
 import { HeroStage } from './HeroStage';
@@ -34,9 +34,7 @@ export function Hero() {
           <p className="text-body-l text-ink-soft mt-6 max-w-[38rem]">{hero.sub}</p>
 
           <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button href={DEMO_URL} className="w-full sm:w-auto" data-cta="book-demo">
-              {cta.primary}
-            </Button>
+            <RequestDemoButton className="w-full sm:w-auto" />
             <WatchDemoButton className="w-full sm:w-auto" />
           </div>
 

@@ -1,4 +1,4 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from 'react';
 import { cn } from './cn';
 import { ArrowRightIcon } from './icons';
 
@@ -40,7 +40,10 @@ type NativeButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof Com
 type NativeAnchorProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof CommonProps | 'href'>;
 
 export type ButtonProps = CommonProps &
-  (({ href: string } & NativeAnchorProps) | ({ href?: undefined } & NativeButtonProps));
+  (
+    | ({ href: string; ref?: Ref<HTMLAnchorElement> } & NativeAnchorProps)
+    | ({ href?: undefined; ref?: Ref<HTMLButtonElement> } & NativeButtonProps)
+  );
 
 /**
  * The site's only button. Renders an `<a>` when `href` is given, otherwise a

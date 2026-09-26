@@ -1,5 +1,5 @@
-import { cta, DEMO_URL, finalCta } from '@/content/site';
-import { Button } from '../ui/Button';
+import { finalCta } from '@/content/site';
+import { RequestDemoButton } from '../inquiry/RequestDemoButton';
 import { Container } from '../ui/Container';
 import { Section } from '../ui/Section';
 
@@ -20,9 +20,7 @@ export function FinalCta() {
       <Container className="relative flex flex-col items-center text-center">
         <h2 className="text-h2 text-ink max-w-3xl">{finalCta.heading}</h2>
         <p className="text-body-l text-ink-soft mt-5 max-w-xl">{finalCta.sub}</p>
-        <Button href={DEMO_URL} className="mt-9" data-cta="book-demo">
-          {cta.primary}
-        </Button>
+        <RequestDemoButton className="mt-9" />
       </Container>
     </Section>
   );

@@ -1,5 +1,5 @@
-import { DEMO_URL, pricing } from '@/content/site';
-import { Button } from '../ui/Button';
+import { pricing } from '@/content/site';
+import { RequestDemoButton } from '../inquiry/RequestDemoButton';
 import { cn } from '../ui/cn';
 import { Container } from '../ui/Container';
 import { CheckIcon } from '../ui/icons';
@@ -64,14 +64,11 @@ export function Pricing() {
                   ))}
                 </ul>
 
-                <Button
-                  href={DEMO_URL}
+                <RequestDemoButton
                   variant={plan.variant}
+                  label={plan.ctaLabel}
                   className="mt-8 w-full"
-                  data-cta="book-demo"
-                >
-                  {plan.ctaLabel}
-                </Button>
+                />
               </div>
             </li>
           ))}

@@ -1,4 +1,5 @@
 import { nav } from '@/content/site';
+import { DemoModalHost } from '@/components/inquiry/DemoModalHost';
 import { ApproveMoment } from '@/components/sections/ApproveMoment';
 import { Consultants } from '@/components/sections/Consultants';
 import { Faq } from '@/components/sections/Faq';
@@ -10,6 +11,7 @@ import { Nav } from '@/components/sections/Nav';
 import { Platforms } from '@/components/sections/Platforms';
 import { Pricing } from '@/components/sections/Pricing';
 import { Problem } from '@/components/sections/Problem';
+import { RequestDemo } from '@/components/sections/RequestDemo';
 import { Security } from '@/components/sections/Security';
 import { StickyCta } from '@/components/sections/StickyCta';
 import { UseCases } from '@/components/sections/UseCases';
@@ -37,11 +39,13 @@ export default function Page() {
         <Security />
         <Pricing />
         <Faq />
+        <RequestDemo />
         <FinalCta />
       </main>
 
       <Footer />
       <StickyCta />
+      <DemoModalHost />
     </>
   );
 }

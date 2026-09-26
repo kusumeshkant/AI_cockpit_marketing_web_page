@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { cta, DEMO_URL, demoModal } from '@/content/site';
-import { Button } from './ui/Button';
+import { demoModal } from '@/content/site';
+import { RequestDemoButton } from './inquiry/RequestDemoButton';
 import { CloseIcon, PlayIcon } from './ui/icons';
 
 interface DemoModalProps {
@@ -110,9 +110,7 @@ export function DemoModal({ open, onClose }: DemoModalProps) {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button href={DEMO_URL} data-cta="book-demo">
-            {cta.primary}
-          </Button>
+          <RequestDemoButton />
         </div>
       </div>
     </div>

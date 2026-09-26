@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { cta, DEMO_URL } from '@/content/site';
-import { Button } from '../ui/Button';
+import { RequestDemoButton } from '../inquiry/RequestDemoButton';
 import { cn } from '../ui/cn';
 
 /** Mobile-only bottom bar. Slides up once the hero has left the viewport. */
@@ -35,9 +34,7 @@ export function StickyCta() {
       aria-hidden={!visible}
       inert={!visible}
     >
-      <Button href={DEMO_URL} className="w-full" data-cta="book-demo">
-        {cta.primary}
-      </Button>
+      <RequestDemoButton className="w-full" />
     </div>
   );
 }

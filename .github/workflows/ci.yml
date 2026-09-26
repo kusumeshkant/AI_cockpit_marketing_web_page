@@ -27,6 +27,7 @@ jobs:
     env:
       NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
       NEXT_PUBLIC_NOINDEX: ${{ vars.NEXT_PUBLIC_NOINDEX }}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
 
     steps:
       - uses: actions/checkout@v5

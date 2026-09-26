@@ -1,7 +1,5 @@
 import { expect, test, type ConsoleMessage, type Page } from '@playwright/test';
 
-const DEMO_URL = process.env.NEXT_PUBLIC_DEMO_URL || '#book-demo';
-
 /** Collects console errors so every test can assert a clean console. */
 function watchConsole(page: Page) {
   const errors: string[] = [];
@@ -21,19 +19,21 @@ test('hero copy and CTAs render, console is clean', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('You stay the pilot.');
 
   // The hero CTA is visible without waiting for any 3D chunk.
-  await expect(page.locator('#top [data-cta="book-demo"]')).toBeVisible();
+  await expect(page.locator('#top [data-cta="request-demo"]')).toBeVisible();
 
   expect(errors, `console errors:\n${errors.join('\n')}`).toEqual([]);
 });
 
-test('every Book a demo CTA points at the booking link', async ({ page }) => {
+test('every demo CTA targets the on-site form', async ({ page }) => {
   await page.goto('/');
-  const ctas = page.locator('[data-cta="book-demo"]');
+  const ctas = page.locator('[data-cta="request-demo"]');
   const count = await ctas.count();
   expect(count).toBeGreaterThanOrEqual(4);
 
+  // Real anchors to the form section, so they work before hydration replaces
+  // the behaviour with the dialog.
   for (let i = 0; i < count; i += 1) {
-    await expect(ctas.nth(i)).toHaveAttribute('href', DEMO_URL);
+    await expect(ctas.nth(i)).toHaveAttribute('href', '#request-demo');
   }
 });
 
