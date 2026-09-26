@@ -156,6 +156,15 @@ Both email addresses come from the environment, so neither appears in this publi
 `wrangler.toml` declares the D1 binding `DB` and nothing else — it does not switch the project
 to a Worker build.
 
+Its top-level keys apply to **local development, preview and production alike**. There are
+deliberately no `[env.preview]` / `[env.production]` sections: overriding any one
+non-inheritable key in an environment forces every non-inheritable key to be repeated there,
+which is an easy way to silently drop the D1 binding from one environment.
+
+`compatibility_date` is pinned there for the same reason. The dashboard had the two
+environments drifting apart (preview `2026-09-01`, production `2026-09-25`); the file pins the
+newer of the two, so production does not regress and preview catches up.
+
 ### Database
 
 `ai-cockpit-inquiries` already exists and its id is in `wrangler.toml`. To recreate it from
