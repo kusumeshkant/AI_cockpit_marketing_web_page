@@ -9,8 +9,9 @@ interface TurnstileApi {
     el: HTMLElement,
     opts: {
       sitekey: string;
-      size?: 'normal' | 'flexible' | 'invisible';
+      size?: 'normal' | 'flexible' | 'compact';
       appearance?: 'always' | 'execute' | 'interaction-only';
+      execution?: 'render' | 'execute';
       callback?: (token: string) => void;
       'error-callback'?: () => void;
       'expired-callback'?: () => void;
@@ -53,7 +54,8 @@ function loadScript(): Promise<void> {
 }
 
 /**
- * Cloudflare Turnstile, rendered invisibly and executed on submit.
+ * Cloudflare Turnstile. The challenge is deferred until submit, so a visitor
+ * who never sends the form is never challenged.
  *
  * With no site key — local development, or a preview before the variable is
  * set — this renders nothing and `getToken` resolves `undefined`. The endpoint
@@ -74,7 +76,13 @@ export function Turnstile({ siteKey, ref }: { siteKey: string; ref?: Ref<Turnsti
         if (cancelled || !container.current || !window.turnstile) return;
         widgetId.current = window.turnstile.render(container.current, {
           sitekey: siteKey,
-          size: 'invisible',
+          // `execution: 'execute'` is what makes turnstile.execute() valid, and
+          // `appearance: 'execute'` keeps the widget out of the way until a
+          // challenge actually runs. There is no 'invisible' size — that is a
+          // widget mode set in the dashboard, not a render option.
+          size: 'flexible',
+          appearance: 'execute',
+          execution: 'execute',
           callback: (token) => {
             pending.current?.(token);
             pending.current = null;
