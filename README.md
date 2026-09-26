@@ -105,7 +105,32 @@ notification. There is no calendar booking; you follow up yourself.
    the inquiry must not be lost.
 
 Responses: `200 {ok:true}` · `400 {ok:false, errors}` · `403 turnstile_failed` ·
-`405 method_not_allowed` · `413 payload_too_large` · `429 rate_limited` · `500 server`.
+`405 method_not_allowed` · `413 payload_too_large` · `429 rate_limited` ·
+`500 server_misconfigured` · `500 server`.
+
+### Production and previews are not equivalent
+
+The endpoint reads `CF_PAGES_BRANCH`, which Cloudflare injects at runtime.
+
+|                | Production (`main`)                           | Preview (any other branch)                         |
+| -------------- | --------------------------------------------- | -------------------------------------------------- |
+| Missing secret | **500 `server_misconfigured`** — fails closed | Runs                                               |
+| Turnstile      | **Always verified**                           | Skipped _only_ if `TURNSTILE_SECRET_KEY` is absent |
+| Email subject  | `New demo request — …`                        | `[PREVIEW] New demo request — …`                   |
+
+Production requires all four of `TURNSTILE_SECRET_KEY`, `RESEND_API_KEY`, `INQUIRY_FROM_EMAIL`
+and `INQUIRY_TO_EMAIL`. If any is missing the endpoint refuses to run rather than quietly
+accepting unverified submissions or losing them because no email can be sent. Only the code
+`inquiry:server_misconfigured` is logged — never which secret is missing.
+
+**An absent branch name counts as production.** If we cannot prove a deployment is a preview it
+gets the strict path. For `wrangler pages dev`, put `CF_PAGES_BRANCH=local` in `.dev.vars` to get
+preview behaviour.
+
+**Turnstile should be on in previews too.** A Turnstile hostname covers its subdomains, so the
+widget hostname `ai-cockpit-12h.pages.dev` already matches every preview URL
+(`<hash>.ai-cockpit-12h.pages.dev`). Set `TURNSTILE_SECRET_KEY` for the preview environment as
+well; the skip exists as a safety valve, not as the normal state.
 
 Nothing a visitor typed is ever logged — not names, phones, emails or messages. The only thing
 written to the console is a short non-PII code such as `inquiry:rate_limited`.
@@ -122,6 +147,9 @@ wrangler pages secret put INQUIRY_FROM_EMAIL   --project-name ai-cockpit
 wrangler pages secret put IP_HASH_SALT         --project-name ai-cockpit   # optional
 ```
 
+Wrangler asks which environment each secret belongs to. Set them for **both** production and
+preview — run the command twice — or previews will fall back to the skip path.
+
 Both email addresses come from the environment, so neither appears in this public repository.
 `IP_HASH_SALT` is optional; without it the Turnstile secret is used as the salt.
 
@@ -130,10 +158,17 @@ to a Worker build.
 
 ### Database
 
+`ai-cockpit-inquiries` already exists and its id is in `wrangler.toml`. To recreate it from
+scratch:
+
 ```bash
 wrangler d1 create ai-cockpit-inquiries          # then paste the id into wrangler.toml
 wrangler d1 execute ai-cockpit-inquiries --remote --file migrations/0001_create_inquiry.sql
 ```
+
+The `functions/` directory and `wrangler.toml` must be present when `wrangler pages deploy`
+runs, or the deployment ships static assets only and `/api/inquiry` answers 405. The CI deploy
+job sparse-checks them out for exactly this reason.
 
 ### Reading new inquiries
 

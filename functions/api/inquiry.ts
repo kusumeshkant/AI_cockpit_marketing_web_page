@@ -4,9 +4,14 @@
  * A Cloudflare Pages Function. The site itself stays a static export; this is
  * the only server-side code.
  *
- * Order matters: cheap rejections first (method, size, origin, shape), then the
- * spam signals, then Turnstile, then validation, then the rate limit, then the
- * write. Verification happens before anything is stored.
+ * Order matters: cheap rejections first (method, origin, configuration, size,
+ * shape), then the spam signals, then Turnstile, then validation, then the rate
+ * limit, then the write. Verification happens before anything is stored.
+ *
+ * Production and previews are deliberately not equivalent. On `main` the
+ * endpoint fails closed: if any secret it needs is missing it returns 500
+ * rather than quietly accepting unverified submissions. Only a preview may skip
+ * Turnstile, and only when the secret is genuinely absent.
  *
  * Nothing a visitor typed is ever logged — not on success, not on failure. The
  * only thing written to the console is a short non-PII error code.
@@ -21,6 +26,8 @@ import {
 
 export interface Env {
   DB: D1Database;
+  /** Injected by Pages at runtime; the branch this deployment was built from. */
+  CF_PAGES_BRANCH?: string;
   TURNSTILE_SECRET_KEY?: string;
   RESEND_API_KEY?: string;
   INQUIRY_TO_EMAIL?: string;
@@ -40,6 +47,26 @@ interface D1PreparedStatement {
 
 type Ctx = { request: Request; env: Env };
 
+/** Secrets the endpoint refuses to run without in production. */
+const REQUIRED_IN_PRODUCTION = [
+  'TURNSTILE_SECRET_KEY',
+  'RESEND_API_KEY',
+  'INQUIRY_FROM_EMAIL',
+  'INQUIRY_TO_EMAIL',
+] as const;
+
+/**
+ * Production is the `main` deployment — and anything we cannot positively
+ * identify as a preview. An absent branch name means we cannot prove this is a
+ * preview, so it gets the strict path rather than the lenient one.
+ *
+ * For `wrangler pages dev`, set CF_PAGES_BRANCH=local in .dev.vars.
+ */
+function isProduction(env: Env): boolean {
+  const branch = typeof env.CF_PAGES_BRANCH === 'string' ? env.CF_PAGES_BRANCH.trim() : '';
+  return branch === '' || branch === 'main';
+}
+
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), {
     status,
@@ -58,9 +85,10 @@ async function sha256Hex(input: string): Promise<string> {
 }
 
 async function verifyTurnstile(env: Env, token: string | undefined, ip: string): Promise<boolean> {
-  // An unconfigured deployment (local dev, a preview before the secret is set)
-  // skips the check. A configured one never can, whatever the client sends.
-  if (!env.TURNSTILE_SECRET_KEY) return true;
+  // Only a preview may run without Turnstile, and only when the secret is
+  // genuinely absent. Production never reaches this branch: the configuration
+  // gate has already returned 500 if the secret is missing.
+  if (!env.TURNSTILE_SECRET_KEY) return !isProduction(env);
   if (!token) return false;
 
   const body = new FormData();
@@ -126,6 +154,8 @@ async function sendNotification(
   value: NonNullable<ReturnType<typeof validateInquiry>['value']>,
   receivedAt: Date,
 ): Promise<void> {
+  // Previews are clearly marked so a test inquiry is never mistaken for a lead.
+  const subjectPrefix = isProduction(env) ? '' : '[PREVIEW] ';
   if (!env.RESEND_API_KEY || !env.INQUIRY_TO_EMAIL || !env.INQUIRY_FROM_EMAIL) {
     logCode('email_not_configured');
     return;
@@ -163,7 +193,7 @@ async function sendNotification(
       body: JSON.stringify({
         from: env.INQUIRY_FROM_EMAIL,
         to: [env.INQUIRY_TO_EMAIL],
-        subject: `New demo request — ${value.name} (${roleLabel})`,
+        subject: `${subjectPrefix}New demo request — ${value.name} (${roleLabel})`,
         text,
         html,
         ...(value.email ? { reply_to: value.email } : {}),
@@ -186,6 +216,14 @@ export const onRequest = async ({ request, env }: Ctx): Promise<Response> => {
   if (!origin || new URL(origin).host !== new URL(request.url).host) {
     logCode('bad_origin');
     return json({ ok: false, error: 'forbidden' }, 403);
+  }
+
+  // Fail closed in production: better a visible 500 than silently accepting
+  // submissions that were never verified, or losing them because no email can
+  // be sent. The code is all that is logged — never which secret is missing.
+  if (isProduction(env) && REQUIRED_IN_PRODUCTION.some((key) => !env[key])) {
+    logCode('server_misconfigured');
+    return json({ ok: false, error: 'server_misconfigured' }, 500);
   }
 
   const declared = Number(request.headers.get('Content-Length') ?? '0');

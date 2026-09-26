@@ -44,6 +44,7 @@ function makeEnv(overrides: Partial<Env> = {}, recent = 0) {
   const { db, inserts } = makeDb(recent);
   const env = {
     DB: db,
+    CF_PAGES_BRANCH: 'feat/preview',
     TURNSTILE_SECRET_KEY: 'turnstile-secret',
     RESEND_API_KEY: 'resend-key',
     INQUIRY_TO_EMAIL: 'inbox@example.test',
@@ -278,4 +279,104 @@ test('sends no email when the addresses are not configured', async () => {
   expect(res.status).toBe(200);
   expect(inserts).toHaveLength(1);
   expect(recorded.emails).toHaveLength(0);
+});
+
+/**
+ * Production and previews are deliberately not equivalent: `main` fails closed
+ * on a missing secret, a preview may run without Turnstile, and preview email
+ * is marked so a test inquiry is never mistaken for a lead.
+ */
+test.describe('production vs preview', () => {
+  test('production refuses to run with a missing secret', async () => {
+    const { restore } = mockFetch();
+
+    for (const missing of [
+      'TURNSTILE_SECRET_KEY',
+      'RESEND_API_KEY',
+      'INQUIRY_FROM_EMAIL',
+      'INQUIRY_TO_EMAIL',
+    ] as const) {
+      const { env, inserts } = makeEnv({ CF_PAGES_BRANCH: 'main', [missing]: undefined });
+      const res = await onRequest({ request: post(goodBody), env });
+
+      expect(res.status, `${missing} missing should fail closed`).toBe(500);
+      expect(await res.json()).toMatchObject({ error: 'server_misconfigured' });
+      expect(inserts, `${missing} missing must store nothing`).toHaveLength(0);
+    }
+
+    restore();
+  });
+
+  test('production never skips Turnstile', async () => {
+    const { recorded, restore } = mockFetch({ turnstileOk: false });
+    const { env, inserts } = makeEnv({ CF_PAGES_BRANCH: 'main' });
+
+    const res = await onRequest({ request: post(goodBody), env });
+    restore();
+
+    expect(res.status).toBe(403);
+    expect(recorded.turnstileCalls).toBe(1);
+    expect(inserts).toHaveLength(0);
+  });
+
+  test('production runs normally once every secret is present', async () => {
+    const { recorded, restore } = mockFetch();
+    const { env, inserts } = makeEnv({ CF_PAGES_BRANCH: 'main' });
+
+    const res = await onRequest({ request: post(goodBody), env });
+    restore();
+
+    expect(res.status).toBe(200);
+    expect(inserts).toHaveLength(1);
+    expect(recorded.emails[0]!.subject).not.toContain('[PREVIEW]');
+  });
+
+  test('a missing branch name is treated as production', async () => {
+    const { restore } = mockFetch();
+    const { env } = makeEnv({ CF_PAGES_BRANCH: undefined, RESEND_API_KEY: undefined });
+
+    const res = await onRequest({ request: post(goodBody), env });
+    restore();
+
+    expect(res.status).toBe(500);
+  });
+
+  test('a preview skips Turnstile only when the secret is absent', async () => {
+    const { recorded, restore } = mockFetch();
+    const body = { ...goodBody };
+    delete (body as Record<string, unknown>).turnstileToken;
+
+    const { env, inserts } = makeEnv({
+      CF_PAGES_BRANCH: 'feat/demo-inquiry',
+      TURNSTILE_SECRET_KEY: undefined,
+    });
+
+    const res = await onRequest({ request: post(body), env });
+    restore();
+
+    expect(res.status).toBe(200);
+    expect(recorded.turnstileCalls).toBe(0);
+    expect(inserts).toHaveLength(1);
+  });
+
+  test('a preview with the secret still verifies', async () => {
+    const { recorded, restore } = mockFetch({ turnstileOk: false });
+    const { env } = makeEnv({ CF_PAGES_BRANCH: 'feat/demo-inquiry' });
+
+    const res = await onRequest({ request: post(goodBody), env });
+    restore();
+
+    expect(res.status).toBe(403);
+    expect(recorded.turnstileCalls).toBe(1);
+  });
+
+  test('preview email is prefixed so it cannot be mistaken for a lead', async () => {
+    const { recorded, restore } = mockFetch();
+    const { env } = makeEnv({ CF_PAGES_BRANCH: 'feat/demo-inquiry' });
+
+    await onRequest({ request: post(goodBody), env });
+    restore();
+
+    expect(recorded.emails[0]!.subject).toMatch(/^\[PREVIEW\] New demo request — /);
+  });
 });
