@@ -51,7 +51,6 @@ export const nav = {
   ],
   openMenu: 'Open menu',
   closeMenu: 'Close menu',
-  menuLabel: 'Site menu',
   skipToContent: 'Skip to content',
 } as const;
 

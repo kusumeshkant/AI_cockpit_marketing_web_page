@@ -176,13 +176,12 @@ export function Nav() {
        * makes it the containing block for `position: fixed` descendants, which
        * clamped the sheet to the 72px bar and let the page show through.
        * The sheet is fully opaque and sits directly under the bar.
+       * Disclosure pattern, not a dialog: the toggle's aria-expanded /
+       * aria-controls describe it, and the labelled <nav> inside is the landmark.
        */}
       <div
         ref={panelRef}
         id="mobile-menu"
-        role="dialog"
-        aria-modal="true"
-        aria-label={nav.menuLabel}
         inert={!menuOpen}
         className={cn(
           'bg-bg fixed inset-x-0 top-18 bottom-0 z-[60] flex h-[calc(100dvh-4.5rem)] flex-col overflow-y-auto overscroll-contain lg:hidden',

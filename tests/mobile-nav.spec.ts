@@ -96,18 +96,28 @@ for (const phone of PHONES) {
       });
     }
 
-    test('is an accessible modal sheet', async ({ page }) => {
+    test('is an accessible disclosure', async ({ page }) => {
       await page.goto('/');
       await expect(toggle(page)).toHaveAttribute('aria-expanded', 'false');
+      await expect(toggle(page)).toHaveAttribute('aria-controls', 'mobile-menu');
       await expect(sheet(page)).toBeHidden();
+      // Closed, the sheet's links are out of the tab order and the a11y tree.
+      expect(await sheet(page).evaluate((el) => (el as HTMLElement).inert)).toBe(true);
+      await expect(page.getByRole('navigation', { name: 'Mobile' })).toHaveCount(0);
 
       await openSheet(page);
       await expect(toggle(page)).toHaveAttribute('aria-expanded', 'true');
-      const dialog = page.getByRole('dialog', { name: 'Site menu' });
-      await expect(dialog).toHaveAttribute('aria-modal', 'true');
+      expect(await sheet(page).evaluate((el) => (el as HTMLElement).inert)).toBe(false);
+
+      // A disclosure, not a modal dialog: the labelled <nav> is the landmark.
+      await expect(sheet(page)).not.toHaveAttribute('role', /.*/);
+      await expect(sheet(page)).not.toHaveAttribute('aria-modal', /.*/);
+      await expect(page.getByRole('dialog')).toHaveCount(0);
+      const menuNav = sheet(page).getByRole('navigation', { name: 'Mobile' });
+      await expect(menuNav).toBeVisible();
 
       // Every link is a comfortable tap target.
-      for (const link of await dialog.getByRole('link').all()) {
+      for (const link of await menuNav.getByRole('link').all()) {
         expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(48);
       }
 
