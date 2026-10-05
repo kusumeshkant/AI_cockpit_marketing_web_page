@@ -534,7 +534,7 @@ export const inquiry = {
   retry: 'Try again',
 
   fields: {
-    name: { label: 'Full name', placeholder: 'Kusumeshkant Sharma' },
+    name: { label: 'Full name', placeholder: 'Your name' },
     phone: {
       label: 'Phone / WhatsApp',
       placeholder: '+91 98765 43210',
