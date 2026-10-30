@@ -29,6 +29,13 @@ const HEADERS = join(OUT, '_headers');
 const HASH_TOKEN = '__INLINE_SCRIPT_HASHES__';
 const NOINDEX_TOKEN = '__NOINDEX_HEADER__';
 
+/**
+ * Pages Play Console links to; on noindex builds they get the X-Robots-Tag
+ * removed again (`! X-Robots-Tag`). Mirrors LEGAL_PATHS in
+ * src/content/legal.ts (tests/legal-pages.spec.ts checks they match).
+ */
+const LEGAL_PATHS = ['/privacy', '/terms', '/delete-account'];
+
 /** Matches `<script>` elements that carry their body inline (no `src`). */
 const INLINE_SCRIPT = /<script(?![^>]*\ssrc=)([^>]*)>([\s\S]*?)<\/script>/gi;
 
@@ -88,9 +95,21 @@ const finished = template
   })
   .join('\n');
 
-await writeFile(HEADERS, finished);
+// Each page is served as `/privacy/` (trailingSlash), reached from `/privacy`.
+const legalExceptions = noindex
+  ? [
+      '',
+      '# Legal pages stay indexable on noindex builds (linked from Play Console).',
+      ...LEGAL_PATHS.flatMap((path) =>
+        [path, `${path}/`, `${path}/*`].flatMap((rule) => [rule, '  ! X-Robots-Tag']),
+      ),
+      '',
+    ].join('\n')
+  : '';
+
+await writeFile(HEADERS, finished.replace(/\s*$/, '\n') + legalExceptions);
 
 console.log(
   `headers: ${hashes.length} inline script hash(es); ` +
-    `X-Robots-Tag ${noindex ? 'added (noindex)' : 'omitted (indexable)'}`,
+    `X-Robots-Tag ${noindex ? `added (noindex), except ${LEGAL_PATHS.join(' ')}` : 'omitted (indexable)'}`,
 );

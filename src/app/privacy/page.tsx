@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: `${privacy.title} — ${brand.name}`,
   description: privacy.description,
   alternates: NOINDEX ? undefined : { canonical: '/privacy' },
+  // Linked from Play Console: indexable even on noindex builds (see LEGAL_PATHS).
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacyPage() {
