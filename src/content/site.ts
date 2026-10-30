@@ -513,7 +513,8 @@ export const footer = {
     { label: 'Security', href: '#security' },
     { label: 'Pricing', href: '#pricing' },
     { label: 'Privacy', href: '/privacy' },
-    { label: 'Terms', href: '#' },
+    { label: 'Terms', href: '/terms' },
+    { label: 'Delete account', href: '/delete-account' },
   ],
 } as const;
 
@@ -605,48 +606,4 @@ export const inquiry = {
     network: 'We could not reach the server. Check your connection and try again.',
     summary: 'Please fix the highlighted fields.',
   },
-} as const;
-
-/* ------------------------------------------------------------------ */
-/* Privacy                                                             */
-/* ------------------------------------------------------------------ */
-
-export const privacy = {
-  title: 'Privacy',
-  draftNotice: 'Draft — review before public launch.',
-  updated: 'Last updated 26 September 2026',
-  intro:
-    'AI Cockpit is run by a solo founder. This page explains, in plain English, what happens to the details you send through the demo request form. It is the only place on this site that collects anything about you.',
-  sections: [
-    {
-      id: 'what',
-      heading: 'What we collect',
-      body: 'Only what you type into the demo request form: your name and phone number, and — if you choose to add them — your email address, company name, what kind of work you do, the tools you use, the best time to call, and a short description of what you want your agents to do. Nothing else. There are no analytics cookies, no advertising trackers and no third-party scripts beyond the anti-spam check described below.',
-    },
-    {
-      id: 'why',
-      heading: 'Why we collect it',
-      body: 'To reply to your demo request and arrange a time to talk. That is the only purpose. We do not sell it, share it with anyone, or add you to a mailing list.',
-    },
-    {
-      id: 'spam',
-      heading: 'Anti-spam',
-      body: 'The form uses Cloudflare Turnstile to tell humans from bots. It checks how the page behaves rather than who you are. We also store a one-way hash of your IP address — not the address itself — purely to stop the same source flooding the form.',
-    },
-    {
-      id: 'where',
-      heading: 'Where it is stored',
-      body: 'In a Cloudflare D1 database, on Cloudflare infrastructure. The notification email we send ourselves goes through Resend. Both process data on servers in the EU and the US depending on routing.',
-    },
-    {
-      id: 'retention',
-      heading: 'How long we keep it',
-      body: 'Up to 12 months from the day you send it, then it is deleted. If we end up working together, anything we keep after that is covered by whatever agreement we sign.',
-    },
-    {
-      id: 'rights',
-      heading: 'Seeing or deleting your data',
-      body: 'Just reply to any email or message you receive from us and ask. We will send you a copy of what we hold, or delete it, within 30 days. You do not need to give a reason.',
-    },
-  ],
 } as const;
