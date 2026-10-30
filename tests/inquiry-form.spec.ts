@@ -179,6 +179,8 @@ test('the privacy page is reachable from the consent checkbox', async ({ page })
   await expect(dialog.getByRole('link', { name: 'Privacy' })).toHaveAttribute('href', '/privacy');
 
   await page.goto('/privacy');
-  await expect(page.getByRole('heading', { level: 1, name: 'Privacy' })).toBeVisible();
-  await expect(page.getByText(/Draft — review before public launch/)).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Privacy Policy' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'This website and the demo request form' }),
+  ).toBeVisible();
 });

@@ -196,11 +196,12 @@ Retention is 12 months (see `/privacy`). To honour a deletion request:
 wrangler d1 execute ai-cockpit-inquiries --remote --command   "DELETE FROM inquiry WHERE id = <id>"
 ```
 
-### Privacy page
+### Legal pages
 
-`/privacy` explains what the form collects, why, where it is stored and how to have it deleted.
-It is currently marked **Draft — review before public launch**, and it deliberately names no
-email address: it tells people to reply to any message they have had from us.
+`/privacy` (app first, then the demo form), `/terms` and `/delete-account` are the URLs entered in
+Play Console (privacy policy, account deletion). Their text lives in `src/content/legal.ts` and must
+match what the app and backend actually do: when a data flow changes (new SDK, PostHog switched on,
+Agent Triggers enabled in the cloud), update that file and the Play Data safety form together.
 
 ---
 
