@@ -82,10 +82,17 @@ tokens (`bg-surface`, `text-h2`, `rounded-(--radius-panel)`, `shadow-(--shadow-d
 
 ---
 
+## Demo callback (Play review)
+
+`POST /api/demo-callback` answers `204` and does nothing else: it never reads the body, stores
+nothing and logs nothing; other methods get `405`. It is the callback URL of the demo agent in the
+Play review account of the AI Cockpit app, so approving a sample action shows as delivered. See the
+backend `docs/DEPLOY.md`, "Play review sign-in".
+
 ## Demo inquiries
 
-The only server-side code on the site: `functions/api/inquiry.ts`, a Cloudflare Pages Function.
-The site itself stays a static export.
+The main server-side code on the site: `functions/api/inquiry.ts`, a Cloudflare Pages Function.
+The site itself stays a static export. (The only other function is `/api/demo-callback`, below.)
 
 A visitor fills the form — in the dialog behind any "Request a demo" CTA, or in the
 `#request-demo` section — and the endpoint stores the submission in Cloudflare D1 and emails a
@@ -229,9 +236,10 @@ src/
   lib/inquiry.ts  validation shared by the form and the Pages Function
 functions/
   api/inquiry.ts  the demo request endpoint (Cloudflare Pages Function)
+  api/demo-callback.ts  do-nothing agent callback for the Play review demo agent
 migrations/       D1 schema
 tests/            smoke.spec.ts · headers.spec.ts · inquiry-form.spec.ts (browser)
-                  inquiry-schema.spec.ts · inquiry-api.spec.ts (no browser)
+                  inquiry-schema.spec.ts · inquiry-api.spec.ts · demo-callback-api.spec.ts (no browser)
 assets/og-image.svg    source artwork for the generated images
 scripts/generate-assets.mjs
 ```
