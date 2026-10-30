@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   title: `${terms.title} — ${brand.name}`,
   description: terms.description,
   alternates: NOINDEX ? undefined : { canonical: '/terms' },
+  // Linked from Play Console: indexable even on noindex builds (see LEGAL_PATHS).
+  robots: { index: true, follow: true },
 };
 
 export default function TermsPage() {

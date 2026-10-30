@@ -30,6 +30,13 @@ export interface LegalDoc {
   readonly parts: readonly LegalPart[];
 }
 
+/**
+ * Pages Play Console links to. They stay crawlable even on noindex builds
+ * (robots.txt, X-Robots-Tag, meta robots); scripts/headers.mjs keeps its own
+ * copy of this list and tests/legal-pages.spec.ts checks the two match.
+ */
+export const LEGAL_PATHS = ['/privacy', '/terms', '/delete-account'] as const;
+
 export const operator = {
   name: 'Kusumeshkant Sharma',
   form: 'sole proprietor',
